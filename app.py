@@ -8,6 +8,7 @@ api = Api(app)
 
 client = MongoClient("mongodb+srv://nicholas_tiner:senior_design@csce483-dn7uw.mongodb.net/test-data?retryWrites=true")
 db = client['wait-data']
+exercises = db['exercises']
 
 api.add_resource(Users, '/users')
 
