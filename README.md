@@ -10,3 +10,6 @@ http://api.mongodb.com/python/current/tutorial.html
 
 tutorial on py mongo cursor object:
 http://api.mongodb.com/python/current/api/pymongo/cursor.html#pymongo.cursor.Cursor
+
+tutorial on reqparse for flask restful:
+https://flask-restful.readthedocs.io/en/0.3.5/reqparse.html
