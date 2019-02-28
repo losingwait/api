@@ -1,9 +1,22 @@
-from flask_restful import Resource # our class must be of type Resource
+from flask import request # need request to do post request
+from flask_restful import Resource, reqparse # our class must be of type Resource
 from bson.objectid import ObjectId # needed to convert object id string back to type object id
+import pymongo # needed to display error message
+
+
+# format of exercises document:
+#       '_id'               : ObjectId
+#       'name'              : String
+#       'category'          : String
+#       'machine_type_id'   : Int
+#       'reps'              : String
+#       'duration'          : String
+
 
 class Exercises(Resource):
     # set the collection to exercises
     def __init__(self, **kwargs):
+        # setting the collection
         self.db = kwargs['db']
         self.exercises = self.db['exercises']
 
@@ -28,3 +41,14 @@ class Exercises(Resource):
             return_result = {'error:' : 'Not Found'}
 
         return return_result
+
+    # manage post requests to the exercises collection
+    # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
+    def post(self):
+        json_data = request.get_json(force=True)
+
+        try:
+            result = self.exercises.insert_one(json_data)
+            return {'inserted': result.acknowledged}
+        except pymongo.errors.DuplicateKeyError as e:
+            return {'inserted': False, 'error': e.details}

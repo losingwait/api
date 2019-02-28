@@ -16,8 +16,9 @@ api = Api(app)
 client = MongoClient("mongodb+srv://nicholas_tiner:senior_design@csce483-dn7uw.mongodb.net/test-data?retryWrites=true")
 db = client['wait-data']
 
+# adding resources for get requests
 api.add_resource(Users, '/users/<string:email>', resource_class_kwargs={'db': db})
-api.add_resource(Exercises, '/exercises/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
+api.add_resource(Exercises, '/exercises/<string:query_category>/<string:query_key>', '/exercises', resource_class_kwargs={'db': db})
 api.add_resource(Archives, '/archives/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Categories, '/categories/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Journals, '/journals/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
@@ -25,6 +26,7 @@ api.add_resource(MachineTypes, '/machine_types/<string:query_category>/<string:q
 api.add_resource(Machines, '/machines/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Workouts, '/workouts/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 
+# function to get a usage message
 @app.route('/help')
 def help():
     help_message = '''
