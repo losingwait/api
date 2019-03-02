@@ -1,7 +1,7 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from pymongo import MongoClient
-from resources.users import Users
+from resources.users import SignUp, Login
 from resources.exercises import Exercises
 from resources.machines import Machines
 from resources.archives import Archives
@@ -18,7 +18,8 @@ client = MongoClient("mongodb+srv://nicholas_tiner:senior_design@csce483-dn7uw.m
 db = client['wait-data']
 
 # adding resources for get requests
-api.add_resource(Users, '/users/<string:email>', resource_class_kwargs={'db': db})
+api.add_resource(SignUp, '/users/signup', resource_class_kwargs={'db': db})
+api.add_resource(Login, '/users/login', resource_class_kwargs={'db': db})
 api.add_resource(Exercises, '/exercises/<string:query_category>/<string:query_key>', '/exercises', resource_class_kwargs={'db': db})
 api.add_resource(Archives, '/archives/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Muscles, '/muscles/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
