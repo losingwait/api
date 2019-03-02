@@ -1,15 +1,15 @@
 from flask_restful import Resource # our class must be of type Resource
 from bson.objectid import ObjectId # needed to convert object id string back to type object id
 
-class Workouts(Resource):
-    # set the collection to workouts
+class MachineTypes(Resource):
+    # set the collection to machine_types
     def __init__(self, **kwargs):
         self.db = kwargs['db']
-        self.workouts = self.db['workouts']
+        self.machine_types = self.db['machine-types']
 
-    # general get request to get workout(s)
+    # general get request to get machine_type(s)
     def get(self, query_category, query_key):
-        # TODO: ADJUST FOR workoutS
+        # TODO: ADJUST FOR machine_typeS
         # adjust the types accordingly since default is string
         if query_category == 'machine_type_id':
             query_key = int(query_key)
@@ -17,7 +17,7 @@ class Workouts(Resource):
             query_key = ObjectId(query_key)
 
         # in order to return a result needs to be {} format
-        result_cursor = self.workouts.find({query_category : query_key})
+        result_cursor = self.machine_types.find({query_category : query_key})
         return_result = {}
         for document in result_cursor:
             document['_id'] = str(document['_id'])
