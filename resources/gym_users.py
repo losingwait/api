@@ -4,21 +4,20 @@ from bson.objectid import ObjectId # needed to convert object id string back to 
 import pymongo # needed to display error message
 
 
-# format of exercises document:
+# format of gym_users document:
 #       '_id'               : ObjectId
 #       'name'              : String
-#       'muscle_id'         : ObjectId
-#       'machine_group_id'  : ObjectId
-#       'exercise_media'    : String
-#       'user_id'           : ObjectId
+#       'check_in_time'     : String
+#       'check_out_time'    : String
+#       'machine_id'        : ObjectId
 
 
-class Exercises(Resource):
+class GymUsers(Resource):
     # set the collection to exercises
     def __init__(self, **kwargs):
         # setting the collection
         self.db = kwargs['db']
-        self.exercises = self.db['exercises']
+        self.exercises = self.db['gym_users']
 
     # general get request to get exercise(s)
     def get(self, query_category, query_key):

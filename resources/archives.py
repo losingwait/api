@@ -1,5 +1,14 @@
-from flask_restful import Resource # our class must be of type Resource
+from flask import request # need request to do post request
+from flask_restful import Resource, reqparse # our class must be of type Resource
 from bson.objectid import ObjectId # needed to convert object id string back to type object id
+import pymongo # needed to display error message
+
+# format of archives document:
+#       '_id'               : ObjectId
+#       'user_id'           : ObjectId
+#       'date'              : String
+#       'length'            : String
+#       'workout_id'        : ObjectId
 
 class Archives(Resource):
     # set the collection to archives

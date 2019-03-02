@@ -5,10 +5,11 @@ from resources.users import SignUp, Login
 from resources.exercises import Exercises
 from resources.machines import Machines
 from resources.archives import Archives
-from resources.journals import Journals
+from resources.notes import Notes
 from resources.workouts import Workouts
-from resources.categories import Categories
-from resources.machine_types import MachineTypes
+from resources.muscles import Muscles
+from resources.machine_groups import MachineGroups
+from resources.gym_users import GymUsers
 
 app = Flask(__name__)
 api = Api(app)
@@ -21,29 +22,31 @@ api.add_resource(SignUp, '/users/signup', resource_class_kwargs={'db': db})
 api.add_resource(Login, '/users/login', resource_class_kwargs={'db': db})
 api.add_resource(Exercises, '/exercises/<string:query_category>/<string:query_key>', '/exercises', resource_class_kwargs={'db': db})
 api.add_resource(Archives, '/archives/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
-api.add_resource(Categories, '/categories/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
-api.add_resource(Journals, '/journals/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
-api.add_resource(MachineTypes, '/machine_types/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
+api.add_resource(Muscles, '/muscles/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
+api.add_resource(Notes, '/notes/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
+api.add_resource(MachineGroups, '/machine_groups/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Machines, '/machines/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Workouts, '/workouts/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
+api.add_resource(GymUsers, '/gym_users/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 
 # function to get a usage message
 @app.route('/help')
 def help():
     help_message = '''
     {
-        "help" : "The below information is how the general form of curl requests should be structured.",
-        "format" : "/collection/search_item/key_value",
-        "example" : "/exercises/category/Chest",
-        "possible collections" : "users, exercises, archives, categories, journals, machine_types, machines, workouts",
-        "users search items" : "tbd",
-        "exercises search items" : "tbd",
-        "archives search items" : "tbd",
-        "categories search items" : "tbd",
-        "journals search items" : "tbd",
-        "machine_types search items" : "tbd",
-        "machines search items" : "tbd",
-        "workouts search items" : "tbd"
+        "help"                          : "The below information is how the general form of curl requests should be structured.",
+        "format"                        : "/collection/search_item/key_value",
+        "example"                       : "/exercises/muscle_id/1",
+        "possible collections"          : "users, gym_users, exercises, archives, muscles, notes, machine_groups, machines, workouts",
+        "users search items"            : "_id, name, password, email, rfid",
+        "gym_users search items"        : "_id, name, check_in_time, check_out_time, machine_id",
+        "exercises search items"        : "_id, name, muscle_id, machine_group_id, exercise_media, user_id (optional)",
+        "archives search items"         : "_id, user_id, date, length, workout_id",
+        "muscles search items"          : "_id, name",
+        "notes search items"            : "_id, title, text, date, user_id",
+        "machine_groups search items"   : "_id, name, location",
+        "machines search items"         : "_id, name, muscle_id, machine_group_id, sensor_id, in_use, user_id, signed_in_time",
+        "workouts search items"         : "_id, name, exercises_array, difficulty, workout_media, user_id"
     } \n'''
     return help_message
 

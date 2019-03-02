@@ -1,6 +1,13 @@
-from flask_restful import Resource, reqparse, abort
-import pymongo
-from bson.objectid import ObjectId
+from flask_restful import Resource, reqparse # our class must be of type Resource
+from bson.objectid import ObjectId # needed to convert object id string back to type object id
+import pymongo # needed to display error message
+
+# format of users document:
+#       '_id'               : ObjectId
+#       'name'              : String
+#       'password'          : String
+#       'email'             : String
+#       'RFID'              : Int
 
 class Login(Resource):
     def __init__(self, **kwargs):
