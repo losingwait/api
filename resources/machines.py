@@ -1,5 +1,19 @@
-from flask_restful import Resource # our class must be of type Resource
+from flask import request # need request to do post request
+from flask_restful import Resource, reqparse # our class must be of type Resource
 from bson.objectid import ObjectId # needed to convert object id string back to type object id
+import pymongo # needed to display error message
+
+
+# format of machines document:
+#       '_id'               : ObjectId
+#       'name'              : String
+#       'muscle_id'         : ObjectId
+#       'machine_group_id'  : ObjectId
+#       'sensor_id'         : Int
+#       'in_use'            : Boolean
+#       'user_id'           : ObjectId
+#       'signed_in_time'    : String
+
 
 class Machines(Resource):
     # set the collection to machines

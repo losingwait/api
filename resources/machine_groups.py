@@ -4,32 +4,29 @@ from bson.objectid import ObjectId # needed to convert object id string back to 
 import pymongo # needed to display error message
 
 
-# format of workouts document:
-#       '_id'                           : ObjectId
-#       'name'                          : String
-#       'array_exercises_dictionary'    : Array (of Dictionaries)
-#       'difficulty'                    : String
-#       'workout_media'                 : String
-#       'user_id'                       : ObjectId
+# format of machine_groups document:
+#       '_id'               : ObjectId
+#       'name'              : String
+#       'location'          : Int
 
 
-class Workouts(Resource):
-    # set the collection to workouts
+class MachineGroups(Resource):
+    # set the collection to machine_groups
     def __init__(self, **kwargs):
         self.db = kwargs['db']
-        self.workouts = self.db['workouts']
+        self.machine_groups = self.db['machine-groups']
 
-    # general get request to get workout(s)
+    # general get request to get machine_group(s)
     def get(self, query_category, query_key):
-        # TODO: ADJUST FOR workoutS
-        # adjust the types accordingly since default is string
-        if query_category == 'machine_type_id':
+        # TODO: ADJUST FOR machine_groups
+        # adjust the groups accordingly since default is string
+        if query_category == 'machine_group_id':
             query_key = int(query_key)
         if query_category == '_id':
             query_key = ObjectId(query_key)
 
         # in order to return a result needs to be {} format
-        result_cursor = self.workouts.find({query_category : query_key})
+        result_cursor = self.machine_groups.find({query_category : query_key})
         return_result = {}
         for document in result_cursor:
             document['_id'] = str(document['_id'])
