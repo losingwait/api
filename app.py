@@ -17,8 +17,8 @@ client = MongoClient("mongodb+srv://nicholas_tiner:senior_design@csce483-dn7uw.m
 db = client['wait-data']
 
 # adding resources for get requests
-api.add_resource(SignUp, '/api/users/signup', resource_class_kwargs={'db': db})
-api.add_resource(Login, '/api/users/login', resource_class_kwargs={'db': db})
+api.add_resource(SignUp, '/users/signup', resource_class_kwargs={'db': db})
+api.add_resource(Login, '/users/login', resource_class_kwargs={'db': db})
 api.add_resource(Exercises, '/exercises/<string:query_category>/<string:query_key>', '/exercises', resource_class_kwargs={'db': db})
 api.add_resource(Archives, '/archives/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Categories, '/categories/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
