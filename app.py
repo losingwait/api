@@ -41,7 +41,7 @@ def help():
         "gym_users search items"        : "_id, name, check_in_time, check_out_time, machine_id",
         "exercises search items"        : "_id, name, muscle_id, machine_group_id, exercise_media, user_id (optional)",
         "archives search items"         : "_id, user_id, date, length, workout_id",
-        "muscles search items"          : "_id, name",
+        "muscles search items"          : "_id, name, all",
         "notes search items"            : "_id, title, text, date, user_id",
         "machine_groups search items"   : "_id, name, location",
         "machines search items"         : "_id, name, muscle_id, machine_group_id, sensor_id, in_use, user_id, signed_in_time",

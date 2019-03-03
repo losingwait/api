@@ -22,8 +22,13 @@ class Muscles(Resource):
         if query_category == '_id':
             query_key = ObjectId(query_key)
 
+        # send proper query
+        if query_category and query_key == 'all':
+            result_cursor = self.muscles.find({})
+        else:
+            result_cursor = self.muscles.find({query_category : query_key})
+
         # in order to return a result needs to be {} format
-        result_cursor = self.muscles.find({query_category : query_key})
         return_result = {}
         for document in result_cursor:
             document['_id'] = str(document['_id'])
