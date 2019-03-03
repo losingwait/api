@@ -2,7 +2,8 @@
 Api to hit mongodb
 
 Example "get" request: 
-curl -i https://losing-wait.herokuapp.com/exercises/category/Chest
+curl -i http://127.0.0.1:5000/muscles/name/Chest
+curl -i http://127.0.0.1:5000/muscles/_id/5c7ae3211c9d440000aefae4
 
 Example "post" request: 
 curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
