@@ -9,7 +9,7 @@ from resources.notes import Notes
 from resources.workouts import Workouts
 from resources.muscles import Muscles
 from resources.machine_groups import MachineGroups
-from resources.gym_users import GymUsers
+from resources.gym_users import Checkin, Checkout
 
 app = Flask(__name__)
 api = Api(app)
@@ -27,7 +27,8 @@ api.add_resource(Notes, '/notes/<string:query_category>/<string:query_key>', res
 api.add_resource(MachineGroups, '/machine_groups/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Machines, '/machines/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(Workouts, '/workouts/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
-api.add_resource(GymUsers, '/gym_users/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
+api.add_resource(Checkin, '/gym_users/checkin', resource_class_kwargs={'db': db})
+api.add_resource(Checkout, '/gym_users/checkout', resource_class_kwargs={'db': db})
 
 # function to get a usage message
 @app.route('/help')
