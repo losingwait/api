@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, request, redirect, url_for, g, session
 from flask_restful import Api
 from pymongo import MongoClient
 from resources.users import SignUp, Login
@@ -50,6 +50,48 @@ def help():
     } \n'''
     return help_message
 
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/gym/status')
+def gym_status():
+    return render_template('gym/status.html')
+
+@app.route('/register/user')
+def register_user():
+    return render_template('register/user.html')
+
+@app.route('/register/machine')
+def register_machine():
+    return render_template('register/machine.html')
+
+@app.route('/admin/login', methods=('GET', 'POST'))
+def admin_login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        # actually log in here
+        session.clear()
+        session['user_id'] = "qwer123"
+        return redirect(url_for('home'))
+    return render_template('admin/login.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+@app.before_request
+def check_logged_in_user():
+    user_id = session.get('user_id')
+    if user_id is None:
+        g.user = None
+    else:
+        # actually call db here
+        g.user = "123"
+
 if __name__ == '__main__':
     #app.debug = True
+    app.config['SECRET_KEY'] = 'senior_design_losing_wait'
     app.run()
