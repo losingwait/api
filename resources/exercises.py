@@ -10,7 +10,8 @@ import pymongo # needed to display error message
 #       'muscle_id'         : ObjectId
 #       'machine_group_id'  : ObjectId
 #       'exercise_media'    : String
-#       'user_id'           : ObjectId
+#       'exercise_image'    : String (optional for "Featured") *** check exists
+#       'user_id'           : ObjectId (optional for "Featured") *** check exists
 
 
 class Exercises(Resource):
@@ -24,16 +25,24 @@ class Exercises(Resource):
     def get(self, query_category, query_key):
 
         # adjust the types accordingly since default is string
-        if query_category == 'machine_type_id':
-            query_key = int(query_key)
-        if query_category == '_id':
+        if '_id' in query_category.lower():
             query_key = ObjectId(query_key)
 
+        # send proper query / if they want all
+        if query_category and query_key == 'all':
+            result_cursor = self.exercises.find({})
+        else:
+            result_cursor = self.exercises.find({query_category : query_key})
+
         # in order to return a result needs to be {} format
-        result_cursor = self.exercises.find({query_category : query_key})
         return_result = {}
         for document in result_cursor:
-            document['_id'] = str(document['_id'])
+            # change all ObjectID's to str()
+            for key, value in document.items():
+                if '_id' in key.lower():
+                    document[key] = str(value)
+            
+            # place the document in the result with the '_id' as the name
             return_result[document['_id']] = document
 
         # if unable to find matching query item
