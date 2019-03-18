@@ -40,3 +40,14 @@ class Workouts(Resource):
             return_result = {'error:' : 'Not Found'}
 
         return return_result
+
+    # manage post requests to the workouts collection
+    # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
+    def post(self):
+        json_data = request.get_json(force=True)
+
+        try:
+            result = self.workouts.insert_one(json_data)
+            return {'inserted': result.acknowledged}
+        except pymongo.errors.DuplicateKeyError as e:
+            return {'inserted': False, 'error': e.details}
