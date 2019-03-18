@@ -9,7 +9,7 @@ import pymongo # needed to display error message
 #       'name'                          : String
 #       'array_exercises_dictionary'    : Array (of Dictionaries)
 #       'difficulty'                    : String
-#       'workout_media'                 : String
+#       'workout_image'                 : String
 #       'user_id'                       : ObjectId
 
 

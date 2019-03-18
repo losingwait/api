@@ -13,26 +13,34 @@ import pymongo # needed to display error message
 
 
 class GymUsers(Resource):
-    # set the collection to exercises
+    # set the collection to gym_users
     def __init__(self, **kwargs):
         # setting the collection
         self.db = kwargs['db']
-        self.exercises = self.db['gym_users']
+        self.gym_users = self.db['gym_users']
 
     # general get request to get exercise(s)
     def get(self, query_category, query_key):
 
         # adjust the types accordingly since default is string
-        if query_category == 'machine_type_id':
-            query_key = int(query_key)
-        if query_category == '_id':
+        if '_id' in query_category.lower():
             query_key = ObjectId(query_key)
 
+        # send proper query / if they want all
+        if query_category and query_key == 'all':
+            result_cursor = self.gym_users.find({})
+        else:
+            result_cursor = self.gym_users.find({query_category : query_key})
+
         # in order to return a result needs to be {} format
-        result_cursor = self.exercises.find({query_category : query_key})
         return_result = {}
         for document in result_cursor:
-            document['_id'] = str(document['_id'])
+            # change all ObjectID's to str()
+            for key, value in document.items():
+                if '_id' in key.lower():
+                    document[key] = str(value)
+            
+            # place the document in the result with the '_id' as the name
             return_result[document['_id']] = document
 
         # if unable to find matching query item
@@ -41,13 +49,13 @@ class GymUsers(Resource):
 
         return return_result
 
-    # manage post requests to the exercises collection
+    # manage post requests to the gym_users collection
     # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
     def post(self):
         json_data = request.get_json(force=True)
 
         try:
-            result = self.exercises.insert_one(json_data)
+            result = self.gym_users.insert_one(json_data)
             return {'inserted': result.acknowledged}
         except pymongo.errors.DuplicateKeyError as e:
             return {'inserted': False, 'error': e.details}
