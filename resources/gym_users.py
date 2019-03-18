@@ -43,6 +43,12 @@ class GymUsers(Resource):
             # place the document in the result with the '_id' as the name
             return_result[document['_id']] = document
 
+        # if unable to find matching query item
+        if return_result == {}:
+            return_result = {'error:' : 'Not Found'}
+
+        return return_result
+
     # manage post requests to the gym_users collection
     # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
     def post(self):
