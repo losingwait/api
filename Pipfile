@@ -11,6 +11,7 @@ pymongo = "*"
 flask-restful = "*"
 gunicorn = "*"
 dnspython = "*"
+werkzeug = "*"
 
 [requires]
 python_version = "3"

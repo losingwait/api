@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, request, redirect, url_for, g, session
 from flask_restful import Api
 from pymongo import MongoClient
+import requests
 from resources.users import SignUp, Login
 from resources.exercises import Exercises
 from resources.machines import Machines
@@ -65,25 +66,32 @@ def register_user():
         email = request.form['email']
         password = request.form['password']
         rfid = request.form['rfid']
-        # use this if email or rfid already exists
-        # return redirect(url_for('register_user'))
-        return redirect(url_for('home'))
-    users = db['users'].find({})
-    return render_template('register/user.html', users=users)
+
+        payload = {'name': name, 'email': email, 'password': password, 'rfid': rfid}
+        r = requests.post(request.url_root + 'users/signup', data=payload)
+        # TODO: Add Flashing code when submitted
+        if r.status_code == requests.codes.ok:
+            return redirect(url_for('home'))
+        else:
+            return redirect(url_for('register_user'))
+    else:
+        users = db['users'].find({})
+        return render_template('register/user.html', users=users)
 
 @app.route('/register/machine', methods=('GET', 'POST'))
 def register_machine():
     if request.method == 'POST':
         pass
     machines = db['machines'].find({})
-    return render_template('register/machine.html', machines=machines)
+    muscles = db['muscles'].find({})
+    return render_template('register/machine.html', machines=machines, muscles=muscles)
 
 @app.route('/admin/login', methods=('GET', 'POST'))
 def admin_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        # actually log in here
+        # TODO: actually log in here
         session.clear()
         session['user_id'] = "qwer123"
         return redirect(url_for('home'))
@@ -100,7 +108,7 @@ def check_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        # actually call db here
+        # TODO: actually call db here
         g.name = "Bobby"
         g.user = "123"
 
