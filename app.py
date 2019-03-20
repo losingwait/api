@@ -58,12 +58,22 @@ def home():
 def gym_status():
     return render_template('gym/status.html')
 
-@app.route('/register/user')
+@app.route('/register/user', methods=('GET', 'POST'))
 def register_user():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        rfid = request.form['rfid']
+        # use this if email or rfid already exists
+        # return redirect(url_for('register_user'))
+        return redirect(url_for('home'))
     return render_template('register/user.html')
 
-@app.route('/register/machine')
+@app.route('/register/machine', methods=('GET', 'POST'))
 def register_machine():
+    if request.method == 'POST':
+        pass
     return render_template('register/machine.html')
 
 @app.route('/admin/login', methods=('GET', 'POST'))
@@ -89,6 +99,7 @@ def check_logged_in_user():
         g.user = None
     else:
         # actually call db here
+        g.name = "Bobby"
         g.user = "123"
 
 if __name__ == '__main__':

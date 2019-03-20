@@ -26,6 +26,6 @@ li a:hover {
   background-color: #111;
 }
 
-.login, .logout {
+.right {
   float: right;
 }

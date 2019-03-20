@@ -5,6 +5,16 @@
 {% endblock %}
 
 {% block content %}
-  <p>Register User</p>
-  <p>form here</p>
+  <h1>Register User</h1>
+  <form method='post'>
+    <label for='name'>Name</label>
+    <input name='name' id='name' type='text' required>
+    <label for='email'>Email</label>
+    <input name='email' id='email' type='email' required>
+    <label for='password'>Password</label>
+    <input name='password' id='password' type='password' required>
+    <label for='rfid'>RFID</label>
+    <input name='rfid' id='rfid' type='number' required>
+    <input type="submit" value='Register'>
+  </form>
 {% endblock %}

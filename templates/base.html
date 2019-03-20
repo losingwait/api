@@ -10,9 +10,10 @@
       <li><a href="{{ url_for('register_machine') }}">Machines</a></li>
     {% endif %}
     {% if g.user %}
-      <li class='logout'><a href="{{ url_for('admin_logout') }}">Logout</a></li>
+      <li class='right'><a href="{{ url_for('admin_logout') }}"><strong>Logout</strong></a></li>
+      <li class='right'><a href="#">{{ g.name }}</a></li>
     {% else %}
-      <li class='login'><a href="{{ url_for('admin_login') }}">Login</a></li>
+      <li class='right'><a href="{{ url_for('admin_login') }}"><strong>Login</strong></a></li>
     {% endif %}
   </ul>
 </nav>
