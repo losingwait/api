@@ -3,6 +3,7 @@ from flask_restful import Api
 from pymongo import MongoClient
 import requests
 from werkzeug.security import check_password_hash
+from functools import wraps
 from bson.objectid import ObjectId
 
 from resources.users import SignUp, Login
@@ -54,15 +55,25 @@ def help():
     } \n'''
     return help_message
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/')
 def home():
     return render_template('home.html')
 
 @app.route('/gym/status')
+@login_required
 def gym_status():
     return render_template('gym/status.html')
 
 @app.route('/register/user', methods=('GET', 'POST'))
+@login_required
 def register_user():
     if request.method == 'POST':
         name = request.form['name']
@@ -82,6 +93,7 @@ def register_user():
         return render_template('register/user.html', users=users)
 
 @app.route('/register/machine', methods=('GET', 'POST'))
+@login_required
 def register_machine():
     if request.method == 'POST':
         pass
@@ -116,8 +128,12 @@ def check_logged_in_user():
         g.user = None
     else:
         admin = db['admins'].find_one({'_id': ObjectId(user_id)})
-        g.name = admin['name']
-        g.user = True
+        if admin:
+            g.name = admin['name']
+            g.user = True
+        else:
+            session.clear()
+            g.user = None
 
 if __name__ == '__main__':
     #app.debug = True
