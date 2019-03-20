@@ -28,13 +28,14 @@
   <section class="content">
     <header>
       {% block header %}
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
+            {% for category, message in messages %}
+              <div class="{{ category }}">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                {{ message }}
+              </div>
             {% endfor %}
-            </ul>
           {% endif %}
         {% endwith %}
       {% endblock %}

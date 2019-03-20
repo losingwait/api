@@ -80,13 +80,12 @@ def register_user():
         email = request.form['email']
         password = request.form['password']
         rfid = request.form['rfid']
-
         payload = {'name': name, 'email': email, 'password': password, 'rfid': rfid}
         r = requests.post(request.url_root + 'users/signup', data=payload)
         if r.status_code == requests.codes.ok:
-            flash("Success: You've created new a user!")
+            flash("You've created new a user!", "success")
         else:
-            flash("Error: You've failed to create a new user!")
+            flash("You've failed to create a new user!", "error")
         return redirect(url_for('register_user'))
     else:
         users = db['users'].find({})
@@ -96,6 +95,7 @@ def register_user():
 @login_required
 def register_machine():
     if request.method == 'POST':
+        # TODO: Add Registering Machines
         pass
     machines = db['machines'].find({})
     muscles = db['muscles'].find({})
@@ -111,10 +111,9 @@ def admin_login():
             if check_password_hash(admin['password'], password):
                 session.clear()
                 session['user_id'] = str(admin['_id'])
-                flash("Success: You've been logged in!")
+                flash("You've been logged in!", "success")
                 return redirect(url_for('home'))
-        # TODO: Add flash warning
-        flash("Error: You couldn't be logged in!")
+        flash("You couldn't be logged in!", "error")
         return redirect(url_for('admin_login'))
     return render_template('admin/login.html')
 
