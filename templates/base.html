@@ -27,7 +27,17 @@
 
   <section class="content">
     <header>
-      {% block header %}{% endblock %}
+      {% block header %}
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+      {% endblock %}
     </header>
     {% block content %}{% endblock %}
   </section>

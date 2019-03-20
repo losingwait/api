@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, redirect, url_for, g, session
+from flask import Flask, jsonify, render_template, request, redirect, url_for, g, session, flash
 from flask_restful import Api
 from pymongo import MongoClient
 import requests
@@ -83,11 +83,11 @@ def register_user():
 
         payload = {'name': name, 'email': email, 'password': password, 'rfid': rfid}
         r = requests.post(request.url_root + 'users/signup', data=payload)
-        # TODO: Add Flashing warning when submitted if fail or success
         if r.status_code == requests.codes.ok:
-            return redirect(url_for('home'))
+            flash("Success: You've created new a user!")
         else:
-            return redirect(url_for('register_user'))
+            flash("Error: You've failed to create a new user!")
+        return redirect(url_for('register_user'))
     else:
         users = db['users'].find({})
         return render_template('register/user.html', users=users)
@@ -111,8 +111,10 @@ def admin_login():
             if check_password_hash(admin['password'], password):
                 session.clear()
                 session['user_id'] = str(admin['_id'])
+                flash("Success: You've been logged in!")
                 return redirect(url_for('home'))
         # TODO: Add flash warning
+        flash("Error: You couldn't be logged in!")
         return redirect(url_for('admin_login'))
     return render_template('admin/login.html')
 
