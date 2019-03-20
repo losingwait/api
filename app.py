@@ -2,6 +2,9 @@ from flask import Flask, jsonify, render_template, request, redirect, url_for, g
 from flask_restful import Api
 from pymongo import MongoClient
 import requests
+from werkzeug.security import check_password_hash
+from bson.objectid import ObjectId
+
 from resources.users import SignUp, Login
 from resources.exercises import Exercises
 from resources.machines import Machines
@@ -69,7 +72,7 @@ def register_user():
 
         payload = {'name': name, 'email': email, 'password': password, 'rfid': rfid}
         r = requests.post(request.url_root + 'users/signup', data=payload)
-        # TODO: Add Flashing code when submitted
+        # TODO: Add Flashing warning when submitted if fail or success
         if r.status_code == requests.codes.ok:
             return redirect(url_for('home'))
         else:
@@ -91,10 +94,14 @@ def admin_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        # TODO: actually log in here
-        session.clear()
-        session['user_id'] = "qwer123"
-        return redirect(url_for('home'))
+        admin = db['admins'].find_one({'email': email})
+        if admin:
+            if check_password_hash(admin['password'], password):
+                session.clear()
+                session['user_id'] = str(admin['_id'])
+                return redirect(url_for('home'))
+        # TODO: Add flash warning
+        return redirect(url_for('admin_login'))
     return render_template('admin/login.html')
 
 @app.route('/admin/logout')
@@ -108,9 +115,9 @@ def check_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        # TODO: actually call db here
-        g.name = "Bobby"
-        g.user = "123"
+        admin = db['admins'].find_one({'_id': ObjectId(user_id)})
+        g.name = admin['name']
+        g.user = True
 
 if __name__ == '__main__':
     #app.debug = True

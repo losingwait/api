@@ -22,8 +22,6 @@ class Login(Resource):
     def post(self):
         args = self.parser.parse_args()
         cursor = self.users.find_one({'email': args['email']})
-        # TODO: Make sure the cursor isn't none
-        print(cursor)
         if cursor:
             if check_password_hash(cursor['password'], args['password']):
                 response = {}
