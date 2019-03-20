@@ -68,13 +68,15 @@ def register_user():
         # use this if email or rfid already exists
         # return redirect(url_for('register_user'))
         return redirect(url_for('home'))
-    return render_template('register/user.html')
+    users = db['users'].find({})
+    return render_template('register/user.html', users=users)
 
 @app.route('/register/machine', methods=('GET', 'POST'))
 def register_machine():
     if request.method == 'POST':
         pass
-    return render_template('register/machine.html')
+    machines = db['machines'].find({})
+    return render_template('register/machine.html', machines=machines)
 
 @app.route('/admin/login', methods=('GET', 'POST'))
 def admin_login():

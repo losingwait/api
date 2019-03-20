@@ -1,9 +1,47 @@
 {% extends 'base.html' %}
 
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/machine.css') }}">
+{% endblock %}
+
 {% block header %}
   <h1>{% block title %}Machine Registration{% endblock %}</h1>
 {% endblock %}
 
 {% block content %}
-  <p>Register User</p>
+  <h1>Register Machines</h1>
+  <form method='post'>
+    <label for='name'>Name</label>
+    <input name='name' id='name' type='text' required>
+    <br/>
+    <label for='mucsle'>Muscle</label>
+    <select name='muscle' required>
+      <option value='other'>Other</option>
+    </select>
+    <br/>
+    <label for='location'>Location</label>
+    <select name='location' required>
+      <option value='none'>None</option>
+    </select>
+    <br/>
+    <label for='sensor'>Sensor ID</label>
+    <input name='sensor' id='sensor' type='text' required>
+    <br/>
+    <input type='submit' value='Register'>
+  </form>
+
+  <h2>Current Machines</h2>
+  <table>
+    <tr>
+      <th>Name</th>
+    </tr>
+    {% for machine in machines %}
+      <tr>
+        <td>
+          {{ machine['name'] }}
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
 {% endblock %}

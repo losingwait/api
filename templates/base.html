@@ -1,26 +1,35 @@
 <!DOCTYPE html>
-<title>{% block title %}{% endblock %} - Losing Wait</title>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
-<nav>
-  <ul>
-    <li><a href="{{ url_for('home') }}"><strong>Losing Wait</strong></a></li>
-    {% if g.user %}
-      <li><a href="{{ url_for('gym_status') }}">Gym</a></li>
-      <li><a href="{{ url_for('register_user') }}">Users</a></li>
-      <li><a href="{{ url_for('register_machine') }}">Machines</a></li>
-    {% endif %}
-    {% if g.user %}
-      <li class='right'><a href="{{ url_for('admin_logout') }}"><strong>Logout</strong></a></li>
-      <li class='right'><a href="#">{{ g.name }}</a></li>
-    {% else %}
-      <li class='right'><a href="{{ url_for('admin_login') }}"><strong>Login</strong></a></li>
-    {% endif %}
-  </ul>
-</nav>
+<html>
+<head>
+  {% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>{% block title %}{% endblock %} - Losing Wait</title>
+  {% endblock %}
+</head>
 
-<section class="content">
-  <header>
-    {% block header %}{% endblock %}
-  </header>
-  {% block content %}{% endblock %}
-</section>
+<body>
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('home') }}"><strong>Losing Wait</strong></a></li>
+      {% if g.user %}
+        <li><a href="{{ url_for('gym_status') }}">Gym</a></li>
+        <li><a href="{{ url_for('register_user') }}">Users</a></li>
+        <li><a href="{{ url_for('register_machine') }}">Machines</a></li>
+      {% endif %}
+      {% if g.user %}
+        <li class='right'><a href="{{ url_for('admin_logout') }}"><strong>Logout</strong></a></li>
+        <li class='right'><a href="#">{{ g.name }}</a></li>
+      {% else %}
+        <li class='right'><a href="{{ url_for('admin_login') }}"><strong>Login</strong></a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <section class="content">
+    <header>
+      {% block header %}{% endblock %}
+    </header>
+    {% block content %}{% endblock %}
+  </section>
+</body>
+</html>
