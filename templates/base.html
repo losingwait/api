@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  {% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+    <title>{% block title %}{% endblock %} - Losing Wait</title>
+  {% endblock %}
+</head>
+
+<body>
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('home') }}"><strong>Losing Wait</strong></a></li>
+      {% if g.user %}
+        <li><a href="{{ url_for('gym_status') }}">Gym</a></li>
+        <li><a href="{{ url_for('register_user') }}">Users</a></li>
+        <li><a href="{{ url_for('register_machine') }}">Machines</a></li>
+      {% endif %}
+      {% if g.user %}
+        <li class='right'><a href="{{ url_for('admin_logout') }}"><strong>Logout</strong></a></li>
+        <li class='right'><a href="#">{{ g.name }}</a></li>
+      {% else %}
+        <li class='right'><a href="{{ url_for('admin_login') }}"><strong>Login</strong></a></li>
+      {% endif %}
+    </ul>
+  </nav>
+
+  <section class="content">
+    <header>
+      {% block header %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="{{ category }}">
+                <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span> 
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      {% endblock %}
+    </header>
+    {% block content %}{% endblock %}
+  </section>
+</body>
+</html>

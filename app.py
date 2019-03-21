@@ -1,6 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, request, redirect, url_for, g, session, flash
 from flask_restful import Api
 from pymongo import MongoClient
+import requests
+from werkzeug.security import check_password_hash
+from functools import wraps
+from bson.objectid import ObjectId
+
 from resources.users import SignUp, Login
 from resources.exercises import Exercises
 from resources.machines import Machines
@@ -50,6 +55,88 @@ def help():
     } \n'''
     return help_message
 
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if g.user is None:
+            return redirect(url_for('admin_login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/')
+def home():
+    return render_template('home.html')
+
+@app.route('/gym/status')
+@login_required
+def gym_status():
+    return render_template('gym/status.html')
+
+@app.route('/register/user', methods=('GET', 'POST'))
+@login_required
+def register_user():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        rfid = request.form['rfid']
+        payload = {'name': name, 'email': email, 'password': password, 'rfid': rfid}
+        r = requests.post(request.url_root + 'users/signup', data=payload)
+        if r.status_code == requests.codes.ok:
+            flash("You've created new a user!", "success")
+        else:
+            flash("You've failed to create a new user!", "error")
+        return redirect(url_for('register_user'))
+    else:
+        users = db['users'].find({})
+        return render_template('register/user.html', users=users)
+
+@app.route('/register/machine', methods=('GET', 'POST'))
+@login_required
+def register_machine():
+    if request.method == 'POST':
+        # TODO: Add Registering Machines
+        pass
+    machines = db['machines'].find({})
+    muscles = db['muscles'].find({})
+    return render_template('register/machine.html', machines=machines, muscles=muscles)
+
+@app.route('/admin/login', methods=('GET', 'POST'))
+def admin_login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        admin = db['admins'].find_one({'email': email})
+        if admin:
+            if check_password_hash(admin['password'], password):
+                session.clear()
+                session['user_id'] = str(admin['_id'])
+                flash("You've been logged in!", "success")
+                return redirect(url_for('home'))
+        flash("You couldn't be logged in!", "error")
+        return redirect(url_for('admin_login'))
+    return render_template('admin/login.html')
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+@app.before_request
+def check_logged_in_user():
+    user_id = session.get('user_id')
+    if user_id is None:
+        g.user = None
+    else:
+        admin = db['admins'].find_one({'_id': ObjectId(user_id)})
+        if admin:
+            g.name = admin['name']
+            g.user = True
+        else:
+            session.clear()
+            g.user = None
+
 if __name__ == '__main__':
     #app.debug = True
+    app.config['SECRET_KEY'] = 'senior_design_losing_wait'
     app.run()
