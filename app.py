@@ -19,6 +19,8 @@ from resources.gym_users import GymUsers
 app = Flask(__name__)
 api = Api(app)
 
+app.secret_key = 'senior_design_losing_wait'
+
 client = MongoClient("mongodb+srv://nicholas_tiner:senior_design@csce483-dn7uw.mongodb.net/test-data?retryWrites=true")
 db = client['wait-data']
 
@@ -138,5 +140,4 @@ def check_logged_in_user():
 
 if __name__ == '__main__':
     #app.debug = True
-    app.config['SECRET_KEY'] = 'senior_design_losing_wait'
     app.run()
