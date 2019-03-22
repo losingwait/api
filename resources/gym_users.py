@@ -24,14 +24,14 @@ class GymCheckin(Resource):
         args = self.parser.parse_args()
         user = self.users.find_one({'rfid': args['rfid']}, {'name': 1, '_id': 1})
         if user:
-            gym_user = self.gym_users.find_one({'user_id': ObjectId(user['_id'])})
+            gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
             if not gym_user:
                 # check into the gym
-                result = self.gym_users.insert_one({'user_id': ObjectId(user['_id']), 'name': user['name'], 'time': datetime.now()})
+                result = self.gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
                 return {'checkin': result.acknowledged, 'checkout': False}, 201
             else:
                 # check out of the gym
-                result = self.gym_users.delete_one({'user_id': ObjectId(user['_id'])})
+                result = self.gym_users.delete_one({'user_id': str(user['_id'])})
                 return {'checkin': False, 'checkout': result.acknowledged}, 201
         else:
             return {'error': 'user not registered'}, 400
