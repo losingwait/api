@@ -31,6 +31,7 @@ class GymCheckin(Resource):
                 return {'checkin': result.acknowledged, 'checkout': False}, 201
             else:
                 # check out of the gym
+                # TODO: May want to force check them out of a machine
                 result = self.gym_users.delete_one({'user_id': str(user['_id'])})
                 return {'checkin': False, 'checkout': result.acknowledged}, 201
         else:
@@ -50,34 +51,33 @@ class MachineCheckin(Resource):
     def post(self):
         args = self.parser.parse_args()
         user = self.users.find_one({'rfid': args['rfid']}, {'_id': 1})
-        machines = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1})
-        try:
-            result = self.gym_users.update_one({'user_id': user['_id']},
-                {'$set': {'machine_id': ObjectId(machines['_id'])}},
-                upsert=False)
-            return {'updated': result.acknowledged}, 202
-        except pymongo.errors.DuplicateKeyError as e:
-            return {'updated': False, 'error': e.details}, 400
-
-# TODO: Split this into two classes
-class Checkout(Resource):
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.gym_users = self.db['gym_users']
-        self.users = self.db['users']
-        self.parser = reqparse.RequestParser(bundle_errors=True)
-        self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('machine_id', required=False, location="form", case_sensitive=True, trim=True)
-
-    # allows users to check out of gym
-    def delete(self):
-        args = self.parser.parse_args()
-        print(args['user_id'])
-        return {}, 201
-
-    # allows users to check out of a machine
-    def put(self):
-        args = self.parser.parse_args()
-        print(args['user_id'])
-        print(args['machine_id'])
-        return {}, 202
+        machine = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1})
+        print("user", user)
+        print("machine", machine)
+        if user and machine:
+            gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
+            if gym_user:
+                if 'machine_id' not in gym_user:
+                    # check into a machine
+                    userResult = self.gym_users.update_one({'user_id': str(user['_id'])},
+                        {'$set': {'machine_id': str(machine['_id'])}},
+                        upsert=True)
+                    machineResult = self.machines.update_one({'_id': machine['_id']},
+                        {'$set': {'in_use': True, 'user_id': str(user['_id']), 'signed_in_time': datetime.now()}},
+                        upsert=True)
+                    return {'checkin': True, 'checkout': False}, 200
+                else:
+                    userResult = self.gym_users.update_one({'user_id': str(user['_id'])},
+                        {'$unset': {'machine_id': ""}},
+                        upsert=True)
+                    machineResult = self.machines.update_one({'_id': machine['_id']},
+                        {'$set': {'in_use': False},
+                        '$unset': {'user_id': "", 'signed_in_time': ""}},
+                        upsert=True)
+                    # TODO: Add archives here
+                    return {'checkin': False, 'checkout': True}, 200
+            else:
+                # TODO: May want to force check them in
+                return {'error': "User not checked in"}, 401
+        else:
+            return {'error': "User or machine are not registered"}, 400
