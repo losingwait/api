@@ -10,7 +10,6 @@ import pymongo # needed to display error message
 #       'muscle_id'         : ObjectId
 #       'machine_group_id'  : ObjectId
 #       'exercise_media'    : String
-#       'exercise_image'    : String (optional for "Featured") *** check exists
 #       'user_id'           : ObjectId (optional for "Featured") *** check exists
 
 
