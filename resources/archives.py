@@ -5,10 +5,10 @@ import pymongo # needed to display error message
 
 # format of archives document:
 #       '_id'               : ObjectId
-#       'user_id'           : ObjectId
+#       'user_id'           : ObjectId (String)
 #       'date'              : String
 #       'length'            : String
-#       'workout_id'        : ObjectId
+#       'workout_id'        : ObjectId (String)
 
 class Archives(Resource):
     # set the collection to archives

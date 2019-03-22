@@ -9,7 +9,7 @@ import pymongo # needed to display error message
 #       'name'              : String
 #       'check_in_time'     : String
 #       'check_out_time'    : String
-#       'machine_id'        : ObjectId
+#       'machine_id'        : ObjectId (String)
 
 
 class GymUsers(Resource):

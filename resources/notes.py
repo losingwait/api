@@ -9,7 +9,7 @@ import pymongo # needed to display error message
 #       'title'             : String
 #       'text'              : String
 #       'date'              : String
-#       'user_id'           : ObjectId
+#       'user_id'           : ObjectId (String)
 
 
 class Notes(Resource):

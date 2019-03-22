@@ -7,11 +7,11 @@ import pymongo # needed to display error message
 # format of machines document:
 #       '_id'               : ObjectId
 #       'name'              : String
-#       'muscle_id'         : ObjectId
-#       'machine_group_id'  : ObjectId
+#       'muscle_id'         : ObjectId (String)
+#       'machine_group_id'  : ObjectId (String)
 #       'sensor_id'         : Int
 #       'in_use'            : Boolean
-#       'user_id'           : ObjectId
+#       'user_id'           : ObjectId (String)
 #       'signed_in_time'    : String
 
 

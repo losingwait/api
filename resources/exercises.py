@@ -7,10 +7,10 @@ import pymongo # needed to display error message
 # format of exercises document:
 #       '_id'               : ObjectId
 #       'name'              : String
-#       'muscle_id'         : ObjectId
-#       'machine_group_id'  : ObjectId
+#       'muscle_id'         : ObjectId (String)
+#       'machine_group_id'  : ObjectId (String)
 #       'exercise_media'    : String
-#       'user_id'           : ObjectId (optional for "Featured") *** check exists
+#       'user_id'           : ObjectId (optional for "Featured") *** check exists (String)
 
 
 class Exercises(Resource):
