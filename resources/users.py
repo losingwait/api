@@ -42,7 +42,7 @@ class SignUp(Resource):
         self.parser.add_argument('rfid', required=True, location="form", case_sensitive=False, trim=True)
 
     # sign up
-    def post(self, **kwargs):
+    def post(self):
         args = self.parser.parse_args()
         try:
             args['password'] = generate_password_hash(args['password'], method='sha256')

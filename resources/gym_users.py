@@ -1,8 +1,7 @@
-from flask import request # need request to do post request
 from flask_restful import Resource, reqparse # our class must be of type Resource
 from bson.objectid import ObjectId # needed to convert object id string back to type object id
 import pymongo # needed to display error message
-
+from datetime import datetime
 
 # format of gym_users document:
 #       '_id'               : ObjectId
@@ -11,51 +10,74 @@ import pymongo # needed to display error message
 #       'check_out_time'    : String
 #       'machine_id'        : ObjectId
 
-
-class GymUsers(Resource):
-    # set the collection to gym_users
+class GymCheckin(Resource):
     def __init__(self, **kwargs):
-        # setting the collection
         self.db = kwargs['db']
         self.gym_users = self.db['gym_users']
+        self.users = self.db['users']
+        self.machines = self.db['machines']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('rfid', required=True, location="form", case_sensitive=True, trim=True)
 
-    # general get request to get exercise(s)
-    def get(self, query_category, query_key):
-
-        # adjust the types accordingly since default is string
-        if '_id' in query_category.lower():
-            query_key = ObjectId(query_key)
-
-        # send proper query / if they want all
-        if query_category and query_key == 'all':
-            result_cursor = self.gym_users.find({})
-        else:
-            result_cursor = self.gym_users.find({query_category : query_key})
-
-        # in order to return a result needs to be {} format
-        return_result = {}
-        for document in result_cursor:
-            # change all ObjectID's to str()
-            for key, value in document.items():
-                if '_id' in key.lower():
-                    document[key] = str(value)
-            
-            # place the document in the result with the '_id' as the name
-            return_result[document['_id']] = document
-
-        # if unable to find matching query item
-        if return_result == {}:
-            return_result = {'error:' : 'Not Found'}
-
-        return return_result
-
-    # manage post requests to the gym_users collection
-    # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
+    # allows users to check into and out of a gym
     def post(self):
-        json_data = request.get_json(force=True)
+        args = self.parser.parse_args()
+        user = self.users.find_one({'rfid': args['rfid']}, {'name': 1, '_id': 1})
+        if user:
+            gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
+            if not gym_user:
+                # check into the gym
+                result = self.gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
+                return {'checkin': result.acknowledged, 'checkout': False}, 201
+            else:
+                # check out of the gym
+                result = self.gym_users.delete_one({'user_id': str(user['_id'])})
+                return {'checkin': False, 'checkout': result.acknowledged}, 201
+        else:
+            return {'error': 'user not registered'}, 400
 
+class MachineCheckin(Resource):
+    def __init__(self, **kwargs):
+        self.db = kwargs['db']
+        self.gym_users = self.db['gym_users']
+        self.users = self.db['users']
+        self.machines = self.db['machines']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('rfid', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('station_id', required=True, location="form", case_sensitive=True, trim=True)
+
+    # allows users to check into a machine
+    def post(self):
+        args = self.parser.parse_args()
+        user = self.users.find_one({'rfid': args['rfid']}, {'_id': 1})
+        machines = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1})
         try:
-            result = self.gym_users.insert_one(json_data)
-            return {'inserted': result.acknowledged}
+            result = self.gym_users.update_one({'user_id': user['_id']},
+                {'$set': {'machine_id': ObjectId(machines['_id'])}},
+                upsert=False)
+            return {'updated': result.acknowledged}, 202
         except pymongo.errors.DuplicateKeyError as e:
-            return {'inserted': False, 'error': e.details}
+            return {'updated': False, 'error': e.details}, 400
+
+# TODO: Split this into two classes
+class Checkout(Resource):
+    def __init__(self, **kwargs):
+        self.db = kwargs['db']
+        self.gym_users = self.db['gym_users']
+        self.users = self.db['users']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('machine_id', required=False, location="form", case_sensitive=True, trim=True)
+
+    # allows users to check out of gym
+    def delete(self):
+        args = self.parser.parse_args()
+        print(args['user_id'])
+        return {}, 201
+
+    # allows users to check out of a machine
+    def put(self):
+        args = self.parser.parse_args()
+        print(args['user_id'])
+        print(args['machine_id'])
+        return {}, 202
