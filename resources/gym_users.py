@@ -10,6 +10,28 @@ from datetime import datetime
 #       'check_out_time'    : String
 #       'machine_id'        : ObjectId (String)
 
+def g_checkin(gym_users, user):
+    return gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
+
+def m_checkin(gym_users, machines, user_id, machine_id):
+    userResult = gym_users.update_one({'user_id': str(user_id)},
+        {'$set': {'machine_id': str(machine_id)}},
+        upsert=True)
+    machineResult = machines.update_one({'_id': machine_id},
+        {'$set': {'in_use': True, 'user_id': str(user_id), 'signed_in_time': datetime.now()}},
+        upsert=True)
+    return
+
+def m_checkout(gym_users, machines, user_id, machine_id):
+    userResult = gym_users.update_one({'user_id': str(user_id)},
+        {'$unset': {'machine_id': ""}},
+        upsert=True)
+    machineResult = machines.update_one({'_id': machine_id},
+        {'$set': {'in_use': False},
+        '$unset': {'user_id': "", 'signed_in_time': ""}},
+        upsert=True)
+    return
+
 class GymCheckin(Resource):
     def __init__(self, **kwargs):
         self.db = kwargs['db']
@@ -27,10 +49,12 @@ class GymCheckin(Resource):
             gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
             if not gym_user:
                 # check into the gym
-                result = self.gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
+                result = g_checkin(self.gym_users, user)
                 return {'checkin': result.acknowledged, 'checkout': False}, 201
             else:
                 # check out of the gym
+                if 'machine_id' in gym_user:
+                    m_checkout(self.gym_users, self.machines, user['_id'], ObjectId(gym_user['machine_id']))
                 result = self.gym_users.delete_one({'user_id': str(user['_id'])})
                 return {'checkin': False, 'checkout': result.acknowledged}, 201
         else:
@@ -49,35 +73,28 @@ class MachineCheckin(Resource):
     # allows users to check into a machine
     def post(self):
         args = self.parser.parse_args()
-        user = self.users.find_one({'rfid': args['rfid']}, {'_id': 1})
-        machines = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1})
-        try:
-            result = self.gym_users.update_one({'user_id': user['_id']},
-                {'$set': {'machine_id': ObjectId(machines['_id'])}},
-                upsert=False)
-            return {'updated': result.acknowledged}, 202
-        except pymongo.errors.DuplicateKeyError as e:
-            return {'updated': False, 'error': e.details}, 400
-
-# TODO: Split this into two classes
-class Checkout(Resource):
-    def __init__(self, **kwargs):
-        self.db = kwargs['db']
-        self.gym_users = self.db['gym_users']
-        self.users = self.db['users']
-        self.parser = reqparse.RequestParser(bundle_errors=True)
-        self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('machine_id', required=False, location="form", case_sensitive=True, trim=True)
-
-    # allows users to check out of gym
-    def delete(self):
-        args = self.parser.parse_args()
-        print(args['user_id'])
-        return {}, 201
-
-    # allows users to check out of a machine
-    def put(self):
-        args = self.parser.parse_args()
-        print(args['user_id'])
-        print(args['machine_id'])
-        return {}, 202
+        user = self.users.find_one({'rfid': args['rfid']}, {'name': 1, '_id': 1})
+        machine = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1})
+        if user and machine:
+            gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
+            if gym_user:
+                if 'machine_id' not in gym_user:
+                    # User in gym but not checked into machine
+                    m_checkin(self.gym_users, self.machines, user['_id'], machine['_id'])
+                else:
+                    # TODO: Add archives here
+                    if gym_user['machine_id'] == str(machine['_id']):
+                        # User check out of current machine
+                        m_checkout(self.gym_users, self.machines, user['_id'], machine['_id'])
+                        return {'checkin': False, 'checkout': True}, 200
+                    else:
+                        # User already checked into different machine without checkout
+                        m_checkout(self.gym_users, self.machines, user['_id'], ObjectId(gym_user['machine_id']))
+                        m_checkin(self.gym_users, self.machines, user['_id'], machine['_id'])
+            else:
+                # User wasn't checked into the gym
+                g_checkin(self.gym_users, user)
+                m_checkin(self.gym_users, self.machines, user['_id'], machine['_id'])
+            return {'checkin': True, 'checkout': False}, 200
+        else:
+            return {'error': "User or machine are not registered"}, 400
