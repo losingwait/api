@@ -8,7 +8,7 @@ from datetime import datetime
 #       'name'              : String
 #       'check_in_time'     : String
 #       'check_out_time'    : String
-#       'machine_id'        : ObjectId
+#       'machine_id'        : ObjectId (String)
 
 class GymCheckin(Resource):
     def __init__(self, **kwargs):

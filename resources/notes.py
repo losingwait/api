@@ -9,7 +9,7 @@ import pymongo # needed to display error message
 #       'title'             : String
 #       'text'              : String
 #       'date'              : String
-#       'user_id'           : ObjectId
+#       'user_id'           : ObjectId (String)
 
 
 class Notes(Resource):
@@ -22,7 +22,7 @@ class Notes(Resource):
     def get(self, query_category, query_key):
         
         # adjust the types accordingly since default is string
-        if '_id' in query_category.lower():
+        if '_id' == query_category.lower():
             query_key = ObjectId(query_key)
         
         # send proper query / if they want all
@@ -36,7 +36,7 @@ class Notes(Resource):
         for document in result_cursor:
             # change all ObjectID's to str()
             for key, value in document.items():
-                if '_id' in key.lower():
+                if '_id' == key.lower():
                     document[key] = str(value)
             
             # place the document in the result with the '_id' as the name
