@@ -14,7 +14,7 @@ class MachineGroups(Resource):
     # set the collection to machine_groups
     def __init__(self, **kwargs):
         self.db = kwargs['db']
-        self.machine_groups = self.db['machine-groups']
+        self.machine_groups = self.db['machine_groups']
 
     # general get request to get machine_group(s)
     def get(self, query_category, query_key):
