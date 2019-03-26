@@ -44,17 +44,17 @@ def help():
     {
         "help"                          : "The below information is how the general form of curl requests should be structured.",
         "format"                        : "/collection/search_item/key_value",
-        "example"                       : "/exercises/muscle_id/1",
+        "example"                       : "/muscles/name/Chest",
         "possible collections"          : "users, gym_users, exercises, archives, muscles, notes, machine_groups, machines, workouts",
         "users search items"            : "_id, name, password, email, rfid",
         "gym_users search items"        : "_id, name, check_in_time, check_out_time, machine_id",
-        "exercises search items"        : "_id, name, muscle_id, machine_group_id, exercise_media, exercises_image (optional), user_id (optional)",
+        "exercises search items"        : "_id, name, muscle_id, machine_group_id, exercise_media, user_id (optional)",
         "archives search items"         : "_id, user_id, date, length, workout_id",
-        "muscles search items"          : "_id, name, all",
+        "muscles search items"          : "_id, name",
         "notes search items"            : "_id, title, text, date, user_id",
         "machine_groups search items"   : "_id, name, location",
         "machines search items"         : "_id, name, muscle_id, machine_group_id, sensor_id, in_use, user_id, signed_in_time",
-        "workouts search items"         : "_id, name, exercises_array, difficulty, workout_image, user_id"
+        "workouts search items"         : "_id, name, array_exercises_array, difficulty, workout_image, user_id"
     } \n'''
     return help_message
 
