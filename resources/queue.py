@@ -103,6 +103,6 @@ class Queue(Resource):
             elif json_data['action'] == "remove":
                 result = remove_user(self.machine_groups, json_data['_id'], json_data['user_id'])
 
-            return {'inserted': result.acknowledged}
+            return {'updated': result.acknowledged}
         except pymongo.errors.DuplicateKeyError as e:
-            return {'inserted': False, 'error': e.details}
+            return {'updated': False, 'error': e.details}
