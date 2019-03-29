@@ -81,6 +81,7 @@ class MachineCheckin(Resource):
                 if 'machine_id' not in gym_user:
                     # User in gym but not checked into machine
                     m_checkin(self.gym_users, self.machines, user['_id'], machine['_id'])
+                    return {'checkin': True, 'checkout': False}, 200
                 else:
                     # TODO: Add archives here
                     if gym_user['machine_id'] == str(machine['_id']):
@@ -91,10 +92,11 @@ class MachineCheckin(Resource):
                         # User already checked into different machine without checkout
                         m_checkout(self.gym_users, self.machines, user['_id'], ObjectId(gym_user['machine_id']))
                         m_checkin(self.gym_users, self.machines, user['_id'], machine['_id'])
+                        return {'checkin': True, 'checkout': False}, 300
             else:
                 # User wasn't checked into the gym
                 g_checkin(self.gym_users, user)
                 m_checkin(self.gym_users, self.machines, user['_id'], machine['_id'])
-            return {'checkin': True, 'checkout': False}, 200
+                return {'checkin': True, 'checkout': False}, 301
         else:
-            return {'error': "User or machine are not registered"}, 400
+            return {'error': 'User or machine are not registered'}, 400
