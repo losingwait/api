@@ -68,3 +68,25 @@ class Machines(Resource):
         except pymongo.errors.DuplicateKeyError as e:
             return {'inserted': False, 'error': e.details}
 
+
+class MachinesStatus(Resource):
+    def __init__(self, **kwargs):
+        self.db = kwargs['db']
+        self.machines = self.db['machines']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('station_list', type=list, required=True, location='json')
+
+    # get machine status for LED color
+    def get(self):
+        args = self.parser.parse_args()
+        station_list = args['station_list']
+        cursor = self.machines.find({'station_id': {"$in": station_list}})
+        result = {}
+        for doc in cursor:
+            status = ''
+            if doc['in_use']:
+                status = 'occupied'
+            else:
+                status = 'open'
+            result[doc['station_id']] = status
+        return result, 200

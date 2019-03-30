@@ -8,7 +8,7 @@ from bson.objectid import ObjectId
 
 from resources.users import SignUp, Login
 from resources.exercises import Exercises
-from resources.machines import Machines
+from resources.machines import Machines, MachinesStatus
 from resources.archives import Archives
 from resources.notes import Notes
 from resources.workouts import Workouts
@@ -34,6 +34,7 @@ api.add_resource(Muscles, '/muscles/<string:query_category>/<string:query_key>',
 api.add_resource(Notes, '/notes/<string:query_category>/<string:query_key>', '/notes', resource_class_kwargs={'db': db})
 api.add_resource(MachineGroups, '/machine_groups/<string:query_category>/<string:query_key>', '/machine_groups', resource_class_kwargs={'db': db})
 api.add_resource(Machines, '/machines/<string:query_category>/<string:query_key>', '/machines', resource_class_kwargs={'db': db})
+api.add_resource(MachinesStatus, '/machines/status', resource_class_kwargs={'db': db})
 api.add_resource(Workouts, '/workouts/<string:query_category>/<string:query_key>', '/workouts', resource_class_kwargs={'db': db})
 api.add_resource(GymCheckin, '/gym_users/checkin', resource_class_kwargs={'db': db})
 api.add_resource(MachineCheckin, '/machine_users/checkin', resource_class_kwargs={'db': db})
