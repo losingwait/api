@@ -81,6 +81,7 @@ class MachinesStatus(Resource):
         args = self.parser.parse_args()
         station_list = args['station_list']
         cursor = self.machines.find({'station_id': {"$in": station_list}})
+        # TODO: need to check the size of the machine group queue
         result = {}
         for doc in cursor:
             status = ''
