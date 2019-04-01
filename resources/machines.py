@@ -45,6 +45,8 @@ class Machines(Resource):
             for key, value in document.items():
                 if '_id' == key.lower():
                     document[key] = str(value)
+                if 'signed_in_time' == key.lower():
+                    document[key] = str(value)
                 if key == 'sensor_id':
                     document[key] = int(value)
             
