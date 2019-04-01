@@ -22,12 +22,11 @@ def m_checkin(gym_users, machines, machine_groups, user_id, machine_id, machine_
             availableMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': False})
             # ex: 2 machines available, user at 1 index of queue (second person) then allow checkin
             if groupQueue['queue'].index(str(user_id)) < availableMachines:
-                remove_user(machine_groups, machine_group_id, user_id)
+                remove_user(machine_groups, gym_users, machine_group_id, user_id)
             else:
                 validCheckin = False
         else:
             validCheckin = False
-
 
     if validCheckin:
         userResult = gym_users.update_one({'user_id': str(user_id)},

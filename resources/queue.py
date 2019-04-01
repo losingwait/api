@@ -19,10 +19,18 @@ import pymongo # needed to display error message
 # }
 
 # add user to queue
-def add_user(machine_groups, group_id, user_id):
+def add_user(machine_groups, gym_users, group_id, user_id):
     # check if queue already exists
     exists_find_result = machine_groups.find({"$and": [{"_id": ObjectId(group_id)}, {"queue": {"$exists": True }}]})
     exists_bool = bool(len(list(exists_find_result)))
+
+    user = gym_users.find_one({'user_id': str(user_id)}, {'current_queue': 1})
+    # if user isn't checked into gym
+    if not user:
+        return False
+    # user already queued up
+    if 'current_queue' in user: 
+        remove_user(machine_groups, gym_users, user['current_queue'], user_id)
 
     if not exists_bool: # create queue of one person
         result = machine_groups.update_one({'_id': ObjectId(group_id)},
@@ -44,10 +52,13 @@ def add_user(machine_groups, group_id, user_id):
                 {'$set': {'queue': queue}},
                 upsert=True)
 
-    return result
+    # add current queue to gym user
+    gym_users.update_one({'user_id': str(user_id)}, {'$set': {'current_queue': str(group_id)}})
+
+    return result.acknowledged
 
 # remove user from queue
-def remove_user(machine_groups, group_id, user_id):
+def remove_user(machine_groups, gym_users, group_id, user_id):
     # get array from db
     queue_result = machine_groups.find({"_id": ObjectId(group_id)},{"queue": 1})
     queue_array = []
@@ -68,13 +79,14 @@ def remove_user(machine_groups, group_id, user_id):
                 {'$set': {'queue': queue}},
                 upsert=True)
 
-    return result
+    return result.acknowledged
 
 class Queue(Resource):
     # set the collection to machine_groups
     def __init__(self, **kwargs):
         self.db = kwargs['db']
         self.machine_groups = self.db['machine_groups']
+        self.gym_users = self.db['gym_users']
 
     # general get request to get the queue for a specific machine_group
     def get(self, search_group):
@@ -99,10 +111,10 @@ class Queue(Resource):
 
         try:
             if json_data['action'] == "add":
-                result = add_user(self.machine_groups, json_data['_id'], json_data['user_id'])
+                result = add_user(self.machine_groups, self.gym_users, json_data['_id'], json_data['user_id'])
             elif json_data['action'] == "remove":
-                result = remove_user(self.machine_groups, json_data['_id'], json_data['user_id'])
+                result = remove_user(self.machine_groups, self.gym_users, json_data['_id'], json_data['user_id'])
 
-            return {'updated': result.acknowledged}
+            return {'updated': result}
         except pymongo.errors.DuplicateKeyError as e:
             return {'updated': False, 'error': e.details}
