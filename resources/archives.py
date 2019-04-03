@@ -15,6 +15,11 @@ class Archives(Resource):
     def __init__(self, **kwargs):
         self.db = kwargs['db']
         self.archives = self.db['archives']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('date', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('length', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('workout_id', required=True, location="form", case_sensitive=True, trim=True)
 
     # general get request to get archive(s)
     def get(self, query_category, query_key):
@@ -49,7 +54,7 @@ class Archives(Resource):
     # manage post requests to the archives collection
     # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
     def post(self):
-        json_data = request.get_json(force=True)
+        json_data = self.parser.parse_args()
 
         try:
             result = self.archives.insert_one(json_data)
