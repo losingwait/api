@@ -18,6 +18,46 @@ import pymongo # needed to display error message
 #     "action": "add"/"remove"
 # }
 
+# update queue to make sure 
+'''def update_queue_status(machine_groups, machines, machine_group_id):
+    groupQueue = machine_groups.find_one({'_id': ObjectId(machine_group_id)}, {'queue': 1, '_id': 0})['queue']
+    availableMachines = machines.find({'machine_group_id': machine_group_id}, {'in_use': 1, '_id': 1})
+    print(len(groupQueue))
+    m_status = {}
+    m_status['open'] = 0
+    m_status['queued'] = 0
+    m_status['occupied'] = 0
+    for doc in availableMachines:
+        print(doc)
+        #m_status[doc['in_use']] += 1
+    print(m_status)
+    # their are more users in the queue then queued machines
+    if len(groupQueue) > m_status['queued']:
+        # if any machines are currently open
+        if m_status['open']:
+            need_queued_count = len(groupQueue) - m_status['queued']
+            # Queue as many machines as possible & needed
+            for doc in availableMachines:
+                if doc['in_use'] == 'open':
+                    machines.update_one({'_id': doc['_id']},
+                            {'$set': {'in_use': 'queued'}},
+                            upsert=True)
+                    need_queued_count -= 1
+                    if need_queued_count <= 0:
+                        break
+    # their are less users in the queue then queued machines
+    elif len(groupQueue) < m_status['queued']:
+        need_open_count = m_status['queued'] - len(groupQueue)
+        for doc in availableMachines:
+            if doc['in_use'] == 'queued':
+                machines.update_one({'_id': doc['_id']},
+                        {'$set': {'in_use': 'open'}},
+                        upsert=True)
+                need_open_count -=1
+                if need_open_count <= 0:
+                    break
+    return'''
+
 # add user to queue
 def add_user(machine_groups, gym_users, group_id, user_id):
     # check if queue already exists
@@ -54,6 +94,7 @@ def add_user(machine_groups, gym_users, group_id, user_id):
 
     # add current queue to gym user
     gym_users.update_one({'user_id': str(user_id)}, {'$set': {'current_queue': str(group_id)}})
+    # TODO: Check that at least one machine is queued status
 
     return result.acknowledged
 
@@ -78,6 +119,8 @@ def remove_user(machine_groups, gym_users, group_id, user_id):
         result = machine_groups.update_one({'_id': ObjectId(group_id)},
                 {'$set': {'queue': queue}},
                 upsert=True)
+
+    gym_users.update_one({'user_id': str(user_id)}, {'$unset': {'current_queue': ''}})
 
     return result.acknowledged
 

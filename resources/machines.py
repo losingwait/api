@@ -84,10 +84,5 @@ class MachinesStatus(Resource):
         # TODO: need to check the size of the machine group queue
         result = {}
         for doc in cursor:
-            status = ''
-            if doc['in_use']:
-                status = 'occupied'
-            else:
-                status = 'open'
-            result[doc['station_id']] = status
+            result[doc['station_id']] = doc['in_use']
         return result, 200
