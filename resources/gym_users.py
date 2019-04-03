@@ -22,27 +22,7 @@ def m_checkin(gym_users, machines, machine_groups, user_id, machine_id, machine_
             in_queue, user_next_in_queue = remove_user(machine_groups, gym_users, machines, machine_group_id, user_id, False)
             if not in_queue or not user_next_in_queue:
                 validCheckin = False
-            #if str(user_id) in groupQueue['queue']:
-                #queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
-                # ex: 2 machines available, user at 1 index of queue (second person) then allow checkin
-                #if groupQueue['queue'].index(str(user_id)) < queuedMachines:
-                    # removing user from queue and allowing them to check in
-                    #remove_user(machine_groups, gym_users, machines, machine_group_id, user_id, False)
-                #else:
-                    # user too far in queue to be allowed next
-                #    validCheckin = False
-            #else:
-                # user not in queue
-                #validCheckin = False
         elif in_use == 'open':
-            # user was in the queue but when to an open machine instead of queued machine
-            #if str(user_id) in groupQueue['queue']:
-                #queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
-                # if a machine was queued for the user, then unqueue one machine
-                #if groupQueue['queue'].index(str(user_id)) < queuedMachines:
-                #    machines.update_one({'machine_group_id': machine_group_id, 'in_use': 'queued'},
-                #            {'$set': {'in_use': 'open'}},
-                #            upsert=True)
             remove_user(machine_groups, gym_users, machines, machine_group_id, user_id, True)
 
     if validCheckin:
@@ -58,10 +38,7 @@ def m_checkout(gym_users, machines, machine_groups, user_id, machine_id, machine
     status = 'open'
     groupQueue = machine_groups.find_one({'_id': ObjectId(machine_group_id)}, {'queue': 1, '_id': 0})
     if groupQueue:
-        print(groupQueue['queue'])
-        print(len(groupQueue['queue']))
         queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
-        print(queuedMachines)
         if len(groupQueue['queue']) > queuedMachines:
             status = 'queued'
 
