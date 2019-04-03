@@ -17,31 +17,33 @@ def g_checkin(gym_users, user):
 def m_checkin(gym_users, machines, machine_groups, user_id, machine_id, machine_group_id, in_use):
     groupQueue = machine_groups.find_one({'_id': ObjectId(machine_group_id)}, {'queue': 1, '_id': 0})
     validCheckin = True
-    #update_queue_status(machine_groups, machines, machine_group_id)
     if groupQueue:
         if in_use == 'queued':
-            if str(user_id) in groupQueue['queue']:
-                queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
-                # ex: 2 machines available, user at 1 index of queue (second person) then allow checkin
-                if groupQueue['queue'].index(str(user_id)) < queuedMachines:
-                    # removing user from queue and allowing them to check in
-                    remove_user(machine_groups, gym_users, machine_group_id, user_id)
-                else:
-                    # user too far in queue to be allowed next
-                    validCheckin = False
-            else:
-                # user not in queue
+            in_queue, user_next_in_queue = remove_user(machine_groups, gym_users, machines, machine_group_id, user_id, False)
+            if not in_queue or not user_next_in_queue:
                 validCheckin = False
+            #if str(user_id) in groupQueue['queue']:
+                #queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
+                # ex: 2 machines available, user at 1 index of queue (second person) then allow checkin
+                #if groupQueue['queue'].index(str(user_id)) < queuedMachines:
+                    # removing user from queue and allowing them to check in
+                    #remove_user(machine_groups, gym_users, machines, machine_group_id, user_id, False)
+                #else:
+                    # user too far in queue to be allowed next
+                #    validCheckin = False
+            #else:
+                # user not in queue
+                #validCheckin = False
         elif in_use == 'open':
             # user was in the queue but when to an open machine instead of queued machine
-            if str(user_id) in groupQueue['queue']:
-                queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
+            #if str(user_id) in groupQueue['queue']:
+                #queuedMachines = machines.count({'machine_group_id': machine_group_id, 'in_use': 'queued'})
                 # if a machine was queued for the user, then unqueue one machine
-                if groupQueue['queue'].index(str(user_id)) < queuedMachines:
-                    machines.update_one({'machine_group_id': machine_group_id, 'in_use': 'queued'},
-                            {'$set': {'in_use': 'open'}},
-                            upsert=True)
-                remove_user(machine_groups, gym_users, machine_group_id, user_id)
+                #if groupQueue['queue'].index(str(user_id)) < queuedMachines:
+                #    machines.update_one({'machine_group_id': machine_group_id, 'in_use': 'queued'},
+                #            {'$set': {'in_use': 'open'}},
+                #            upsert=True)
+            remove_user(machine_groups, gym_users, machines, machine_group_id, user_id, True)
 
     if validCheckin:
         userResult = gym_users.update_one({'user_id': str(user_id)},
@@ -130,11 +132,12 @@ class MachineCheckin(Resource):
                     # TODO: Add archives here
                     if gym_user['machine_id'] == str(machine['_id']):
                         # User check out of current machine
-                        status = m_checkout(self.gym_users, self.machines, user['_id'], machine['_id'])
+                        status = m_checkout(self.gym_users, self.machines, self.machine_groups, user['_id'], machine['_id'], machine['machine_group_id'])
                         return {'checkin': False, 'checkout': True, 'status': status}, 200
                     else:
                         # User already checked into different machine without checkout
-                        m_checkout(self.gym_users, self.machines, user['_id'], ObjectId(gym_user['machine_id']))
+                        old_m = self.machines.find_one({'_id': ObjectId(gym_user['machine_id'])}, {'_id': 1, 'machine_group_id': 1, 'in_use': 1})
+                        m_checkout(self.gym_users, self.machines, self.machine_groups, user['_id'], old_m['_id'], old_m['machine_group_id'])
                         if m_checkin(self.gym_users, self.machines, self.machine_groups, user['_id'], machine['_id'], machine['machine_group_id'], machine['in_use']):
                             return {'checkin': True, 'checkout': False, 'status': 'occupied'}, 200
                         else:
