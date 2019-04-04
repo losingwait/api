@@ -114,6 +114,10 @@ class Queue(Resource):
         self.machine_groups = self.db['machine_groups']
         self.gym_users = self.db['gym_users']
         self.machines = self.db['machines']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('action', required=True, location="form", case_sensitive=True, trim=True)
 
     # general get request to get the queue for a specific machine_group
     def get(self, search_group):
@@ -134,7 +138,7 @@ class Queue(Resource):
         
     # curl -i -H "Content-Type: application/json" -X POST -d '{"_id":"5c951d991c9d4400008f68e3","user_id":"123259","action":"add"}' http://localhost:5000/queue
     def post(self):
-        json_data = request.get_json(force=True)
+        json_data = self.parser.parse_args()
 
         try:
             if json_data['action'] == "add":

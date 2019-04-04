@@ -5,7 +5,7 @@ Example "get" request:
 curl -i https://losing-wait.herokuapp.com/muscles/all/all
 
 Example "post" request: 
-curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
+curl -i https://losing-wait.herokuapp.com/users/login -d "email=email@email.com&password=password123"
 
 # helpful resources
 tutorial on basic flask restful:
