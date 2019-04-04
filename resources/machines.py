@@ -35,8 +35,6 @@ class Machines(Resource):
             query_key = ObjectId(query_key)
         if query_category == 'sensor_id':
             query_key = int(query_key)
-        if query_category == 'in_use':
-            query_key = bool(query_key)
         
         # send proper query / if they want all
         if query_category and query_key == 'all':
