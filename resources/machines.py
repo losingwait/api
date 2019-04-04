@@ -10,7 +10,7 @@ import pymongo # needed to display error message
 #       'muscle_id'         : ObjectId (String)
 #       'machine_group_id'  : ObjectId (String)
 #       'sensor_id'         : Int
-#       'in_use'            : Boolean
+#       'in_use'            : String ('open', 'queued', 'occupied')
 #       'user_id'           : ObjectId (String)
 #       'signed_in_time'    : String
 
@@ -35,8 +35,6 @@ class Machines(Resource):
             query_key = ObjectId(query_key)
         if query_category == 'sensor_id':
             query_key = int(query_key)
-        if query_category == 'in_use':
-            query_key = bool(query_key)
         
         # send proper query / if they want all
         if query_category and query_key == 'all':
@@ -89,13 +87,7 @@ class MachinesStatus(Resource):
         args = self.parser.parse_args()
         station_list = args['station_list']
         cursor = self.machines.find({'station_id': {"$in": station_list}})
-        # TODO: need to check the size of the machine group queue
         result = {}
         for doc in cursor:
-            status = ''
-            if doc['in_use']:
-                status = 'occupied'
-            else:
-                status = 'open'
-            result[doc['station_id']] = status
+            result[doc['station_id']] = doc['in_use']
         return result, 200
