@@ -21,10 +21,6 @@ import sys
 
 # add user to queue
 def add_user(machine_groups, gym_users, machines, group_id, user_id):
-    # check if queue already exists
-    exists_find_result = machine_groups.find({"$and": [{"_id": ObjectId(group_id)}, {"queue": {"$exists": True }}]})
-    exists_bool = bool(len(list(exists_find_result)))
-
     user = gym_users.find_one({'user_id': str(user_id)}, {'current_queue': 1})
     # if user isn't checked into gym
     if not user:
@@ -33,10 +29,14 @@ def add_user(machine_groups, gym_users, machines, group_id, user_id):
     if 'current_queue' in user: 
         remove_user(machine_groups, gym_users, machines, user['current_queue'], user_id, True)
 
+    # check if queue already exists
+    exists_find_result = machine_groups.find({"$and": [{"_id": ObjectId(group_id)}, {"queue": {"$exists": True }}]})
+    exists_bool = bool(len(list(exists_find_result)))
+
     if not exists_bool: # create queue of one person
         result = machine_groups.update_one({'_id': ObjectId(group_id)},
                 {'$set': {'queue': [str(user_id)]}},
-                upsert=True)
+                upsert=False)
     else: # add new user to end of array
         # get array from db
         queue_result = machine_groups.find({"_id": ObjectId(group_id)},{"queue": 1})
@@ -51,13 +51,16 @@ def add_user(machine_groups, gym_users, machines, group_id, user_id):
         # update queue in db
         result = machine_groups.update_one({'_id': ObjectId(group_id)},
                 {'$set': {'queue': queue}},
-                upsert=True)
+                upsert=False)
 
     # update gym user with queue and queue one machine if 'open'
-    gym_users.update_one({'user_id': str(user_id)}, {'$set': {'current_queue': str(group_id)}})
+    gym_users.update_one({'user_id': str(user_id)},
+            {'$set': {'current_queue': str(group_id)}},
+            upsert=False)
+    # note that upsert if false, if no machines are open then no machine should change to queued
     machines.update_one({'machine_group_id': str(group_id), 'in_use': 'open'},
             {'$set': {'in_use': 'queued'}},
-            upsert=True)
+            upsert=False)
 
     return result.acknowledged
 
@@ -69,6 +72,8 @@ def remove_user(machine_groups, gym_users, machines, group_id, user_id, free_mac
     for doc in queue_result:
         queue_array.append(doc)
     
+    if not queue_array or 'queue' not in queue_array[0]:
+        return False, False
     # get queue remove user from it
     queue = list(queue_array[0]["queue"])
     user_position = sys.maxsize
@@ -82,21 +87,23 @@ def remove_user(machine_groups, gym_users, machines, group_id, user_id, free_mac
     if len(queue) == 0:
         result = machine_groups.update_one({'_id': ObjectId(group_id)},
                 {'$unset': {'queue': ''}},
-                upsert=True)
+                upsert=False)
     else:
         result = machine_groups.update_one({'_id': ObjectId(group_id)},
                 {'$set': {'queue': queue}},
-                upsert=True)
+                upsert=False)
 
-    gym_users.update_one({'user_id': str(user_id)}, {'$unset': {'current_queue': ''}})
-    queuedMachines = machines.count({'machine_group_id': group_id, 'in_use': 'queued'})
-    user_next_in_queue = False
-    # if a machine was queued for the user, then unqueue one machine
-    if free_machine and user_position < queuedMachines:
-        user_next_in_queue = True
-        machines.update_one({'machine_group_id': group_id, 'in_use': 'queued'},
+    gym_users.update_one({'user_id': str(user_id)},
+            {'$unset': {'current_queue': ''}},
+            upsert=False)
+    queuedMachines = machines.count({'machine_group_id': str(group_id), 'in_use': 'queued'})
+    user_next_in_queue = user_position < queuedMachines
+    # if a machine could have been queued for the user, then unqueue one machine
+    if free_machine and user_next_in_queue:
+        # note that upsert if false, if no machines are queued then no machine should change to open
+        machines.update_one({'machine_group_id': str(group_id), 'in_use': 'queued'},
                 {'$set': {'in_use': 'open'}},
-                upsert=True)
+                upsert=False)
 
     return result.acknowledged, user_next_in_queue
 

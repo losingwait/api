@@ -10,7 +10,7 @@ import pymongo # needed to display error message
 #       'muscle_id'         : ObjectId (String)
 #       'machine_group_id'  : ObjectId (String)
 #       'sensor_id'         : Int
-#       'in_use'            : Boolean
+#       'in_use'            : String ('open', 'queued', 'occupied')
 #       'user_id'           : ObjectId (String)
 #       'signed_in_time'    : String
 
