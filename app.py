@@ -14,7 +14,7 @@ from resources.notes import Notes
 from resources.workouts import Workouts
 from resources.muscles import Muscles
 from resources.machine_groups import MachineGroups
-from resources.gym_users import GymCheckin, MachineCheckin
+from resources.gym_users import GymCheckin, MachineCheckin, FreeWeights
 from resources.queue import Queue
 
 from common.QueueLocks import QueueLocks
@@ -43,6 +43,7 @@ api.add_resource(Workouts, '/workouts/<string:query_category>/<string:query_key>
 api.add_resource(GymCheckin, '/gym_users/checkin', resource_class_kwargs={'db': db, 'queueLocks': queueLocks})
 api.add_resource(MachineCheckin, '/machine_users/checkin', resource_class_kwargs={'db': db, 'queueLocks': queueLocks})
 api.add_resource(Queue, '/queue/<string:search_group>', '/queue', resource_class_kwargs={'db': db, 'queueLocks': queueLocks})
+api.add_resource(FreeWeights, '/free_weights/status', resource_class_kwargs={'db': db})
 
 # function to get a usage message
 @app.route('/help')

@@ -141,3 +141,38 @@ class MachineCheckin(Resource):
                     return {'error': 'user not in queue'}, 403
         else:
             return {'error': 'User or machine are not registered'}, 400
+
+class FreeWeights(Resource):
+    def __init__(self, **kwargs):
+        self.db = kwargs['db']
+        self.machines = self.db['machines']
+        self.parser = reqparse.RequestParser(bundle_errors=True)
+        self.parser.add_argument('station_id', required=True, type=str, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('available', required=True, type=str, location="form", case_sensitive=True, trim=True)
+
+    def post(self):
+        args = self.parser.parse_args()
+        machine = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1, 'in_use': 1})
+        if machine:
+            if args['available'].lower() in ['true']:
+                if machine['in_use'] != 'open':
+                    # TODO: Add archives here
+                    self.machines.update_one({'_id': ObjectId(machine['_id'])},
+                        {'$set': {'in_use': 'open'},
+                        '$unset': {'signed_in_time': ''}},
+                        upsert=False)
+                    return {'updated': True, 'status': 'open'}, 200
+                else:
+                    return {'updated': False, 'status': 'open'}, 200
+            elif args['available'].lower() in ['false']:
+                if machine['in_use'] != 'occupied':
+                    self.machines.update_one({'_id': ObjectId(machine['_id'])},
+                        {'$set': {'in_use': 'occupied', 'signed_in_time': datetime.now()}},
+                        upsert=False)
+                    return {'updated': True, 'status': 'occupied'}, 200
+                else:
+                    return {'updated': False, 'status': 'occupied'}, 200
+            else:
+                return {'error': 'Invalid available parameter. Should be true or false'}, 400
+        else:
+            return {'error': 'Free Weight Machine is not registered'}, 400
