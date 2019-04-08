@@ -14,6 +14,18 @@ from resources.queue import remove_user
 def g_checkin(gym_users, user):
     return gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
 
+def g_checkout(gym_users, machines, machine_groups, user_id, queueLocks):
+    gym_user = gym_users.find_one({'user_id': str(user_id)})
+    # Checkout of machine if user checked into machine
+    if 'machine_id' in gym_user:
+        m_checkout(gym_users, machines, machine_groups, ObjectId(gym_user['user_id']), ObjectId(gym_user['machine_id']), queueLocks)
+    # Leave queue if user is in queue
+    if 'current_queue' in gym_user:
+        queueLocks.lockQueue(gym_user['current_queue'])
+        remove_user(machine_groups, gym_users, machines, gym_user['current_queue'], gym_user['user_id'], True)
+        queueLocks.unlockQueue(gym_user['current_queue'])
+    return gym_users.delete_one({'user_id': str(gym_user['user_id'])})
+
 def m_checkin(gym_users, machines, machine_groups, user_id, machine_id, queueLocks):
     machine = machines.find_one({'_id': ObjectId(machine_id)}, {'_id': 1, 'machine_group_id': 1, 'in_use': 1})
     queueLocks.lockQueue(machine['machine_group_id'])
@@ -75,20 +87,14 @@ class GymCheckin(Resource):
         args = self.parser.parse_args()
         user = self.users.find_one({'rfid': args['rfid']}, {'name': 1, '_id': 1})
         if user:
-            gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
+            gym_user = self.gym_users.find_one({'user_id': str(user['_id'])}, {'user_id': 1})
             if not gym_user:
                 # check into the gym
                 result = g_checkin(self.gym_users, user)
                 return {'checkin': result.acknowledged, 'checkout': False}, 200
             else:
                 # check out of the gym
-                if 'machine_id' in gym_user:
-                    m_checkout(self.gym_users, self.machines, self.machine_groups, user['_id'], ObjectId(gym_user['machine_id']), self.queueLocks)
-                if 'current_queue' in gym_user:
-                    self.queueLocks.lockQueue(gym_user['current_queue'])
-                    remove_user(self.machine_groups, self.gym_users, self.machines, gym_user['current_queue'], gym_user['user_id'], True)
-                    self.queueLocks.unlockQueue(gym_user['current_queue'])
-                result = self.gym_users.delete_one({'user_id': str(user['_id'])})
+                result = g_checkout(self.gym_users, self.machines, self.machine_groups, gym_user['user_id'], self.queueLocks)
                 return {'checkin': False, 'checkout': result.acknowledged}, 200
         else:
             return {'error': 'user not registered'}, 400

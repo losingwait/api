@@ -6,7 +6,7 @@ from werkzeug.security import check_password_hash
 from functools import wraps
 from bson.objectid import ObjectId
 
-from resources.users import SignUp, Login
+from resources.users import SignUp, Login, UpdateUser
 from resources.exercises import Exercises
 from resources.machines import Machines, MachinesStatus
 from resources.archives import Archives
@@ -32,6 +32,7 @@ queueLocks = QueueLocks()
 # adding resources for get requests
 api.add_resource(SignUp, '/users/signup', resource_class_kwargs={'db': db})
 api.add_resource(Login, '/users/login', resource_class_kwargs={'db': db})
+api.add_resource(UpdateUser, '/users/update', resource_class_kwargs={'db': db, 'queueLocks': queueLocks})
 api.add_resource(Exercises, '/exercises/<string:query_category>/<string:query_key>', '/exercises', resource_class_kwargs={'db': db})
 api.add_resource(Archives, '/archives/<string:query_category>/<string:query_key>', '/archives', resource_class_kwargs={'db': db})
 api.add_resource(Muscles, '/muscles/<string:query_category>/<string:query_key>', '/muscles', resource_class_kwargs={'db': db})
