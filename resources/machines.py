@@ -9,7 +9,7 @@ import pymongo # needed to display error message
 #       'name'              : String
 #       'muscle_id'         : ObjectId (String)
 #       'machine_group_id'  : ObjectId (String)
-#       'sensor_id'         : Int
+#       'station_id'        : String
 #       'in_use'            : String ('open', 'queued', 'occupied')
 #       'user_id'           : ObjectId (String)
 #       'signed_in_time'    : String
