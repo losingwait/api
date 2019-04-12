@@ -11,6 +11,45 @@ from resources.queue import remove_user
 #       'check_out_time'    : String
 #       'machine_id'        : ObjectId (String)
 
+
+class GymUsers(Resource):
+    # set the collection to workouts
+    def __init__(self, **kwargs):
+        self.db = kwargs['db']
+        self.gym_users = self.db['gym_users']
+
+    # general get request to get workout(s)
+    def get(self, query_category, query_key):
+        
+        # adjust the types accordingly since default is string
+        if '_id' == query_category.lower():
+            query_key = ObjectId(query_key)
+
+        # send proper query / if they want all
+        if query_category and query_key == 'all':
+            result_cursor = self.gym_users.find({})
+        else:
+            result_cursor = self.gym_users.find({query_category : query_key})
+
+        # in order to return a result needs to be {} format
+        return_result = {}
+        for document in result_cursor:
+            # change all ObjectID's to str()
+            for key, value in document.items():
+                if '_id' == key.lower():
+                    document[key] = str(value)
+                if 'time' == key.lower():
+                    document[key] = str(value)
+            
+            # place the document in the result with the '_id' as the name
+            return_result[document['_id']] = document
+
+        # if unable to find matching query item
+        if return_result == {}:
+            return_result = {'error:' : 'Not Found'}
+
+        return return_result
+
 def g_checkin(gym_users, user):
     return gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
 

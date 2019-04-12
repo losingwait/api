@@ -14,7 +14,7 @@ from resources.notes import Notes
 from resources.workouts import Workouts
 from resources.muscles import Muscles
 from resources.machine_groups import MachineGroups
-from resources.gym_users import GymCheckin, MachineCheckin
+from resources.gym_users import GymCheckin, MachineCheckin, GymUsers
 from resources.queue import Queue
 
 app = Flask(__name__)
@@ -37,6 +37,7 @@ api.add_resource(Machines, '/machines/<string:query_category>/<string:query_key>
 api.add_resource(MachinesStatus, '/machines/status', resource_class_kwargs={'db': db})
 api.add_resource(Workouts, '/workouts/<string:query_category>/<string:query_key>', '/workouts', resource_class_kwargs={'db': db})
 api.add_resource(GymCheckin, '/gym_users/checkin', resource_class_kwargs={'db': db})
+api.add_resource(GymUsers, '/gym_users/<string:query_category>/<string:query_key>', resource_class_kwargs={'db': db})
 api.add_resource(MachineCheckin, '/machine_users/checkin', resource_class_kwargs={'db': db})
 api.add_resource(Queue, '/queue/<string:search_group>', '/queue', resource_class_kwargs={'db': db})
 
