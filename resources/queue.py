@@ -111,6 +111,7 @@ class Queue(Resource):
     # set the collection to machine_groups
     def __init__(self, **kwargs):
         self.db = kwargs['db']
+        self.queueLocks = kwargs['queueLocks']
         self.machine_groups = self.db['machine_groups']
         self.gym_users = self.db['gym_users']
         self.machines = self.db['machines']
@@ -142,9 +143,13 @@ class Queue(Resource):
 
         try:
             if json_data['action'] == "add":
+                self.queueLocks.lockQueue(json_data['_id'])
                 result = add_user(self.machine_groups, self.gym_users, self.machines, json_data['_id'], json_data['user_id'])
+                self.queueLocks.unlockQueue(json_data['_id'])
             elif json_data['action'] == "remove":
+                self.queueLocks.lockQueue(json_data['_id'])
                 result, user_next = remove_user(self.machine_groups, self.gym_users, self.machines, json_data['_id'], json_data['user_id'], True)
+                self.queueLocks.unlockQueue(json_data['_id'])
 
             return {'updated': result}
         except pymongo.errors.DuplicateKeyError as e:
