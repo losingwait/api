@@ -24,7 +24,7 @@ class Machines(Resource):
         self.parser.add_argument('name', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('muscle_id', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('machine_group_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('sensor_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('station_id', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('in_use', required=True, location="form", case_sensitive=True, trim=True)
 
     # general get request to get machine(s)
@@ -33,7 +33,7 @@ class Machines(Resource):
         # adjust the types accordingly since default is string
         if '_id' == query_category.lower():
             query_key = ObjectId(query_key)
-        if query_category == 'sensor_id':
+        if query_category == 'station_id':
             query_key = int(query_key)
         
         # send proper query / if they want all
@@ -51,7 +51,7 @@ class Machines(Resource):
                     document[key] = str(value)
                 if 'signed_in_time' == key.lower():
                     document[key] = str(value)
-                if key == 'sensor_id':
+                if key == 'station_id':
                     document[key] = int(value)
             
             # place the document in the result with the '_id' as the name
@@ -70,9 +70,9 @@ class Machines(Resource):
 
         try:
             result = self.machines.insert_one(json_data)
-            return {'inserted': result.acknowledged}
+            return {'inserted': result.acknowledged}, 200
         except pymongo.errors.DuplicateKeyError as e:
-            return {'inserted': False, 'error': e.details}
+            return {'inserted': False, 'error': e.details}, 400
 
 
 class MachinesStatus(Resource):

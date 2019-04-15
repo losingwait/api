@@ -1,0 +1,22 @@
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 7px;
+}
+
+th {
+  text-align: left;
+  font-size: 20px
+}
+
+table {
+  width: 100%;
+}
+
+.title {
+  font-size: 30px;
+  text-align: center;
+}
