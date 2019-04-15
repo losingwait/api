@@ -2,6 +2,7 @@
 
 {% block head %}
   {{ super() }}
+  <meta http-equiv="refresh" content="15">
   <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/status.css') }}">
 {% endblock %}
 
@@ -58,10 +59,17 @@
     {% endfor %}
   </table>
 
-  <h2>Gym Users Status</h2>
+  <h2>Users Status</h2>
   <table>
     <tr>
-      <th>Total Users</th>
+      <th>Total In Gym</th>
+      <th>Total On Machines</th>
+      <th>Total In Queue</th>
+    </tr>
+    <tr>
+      <td>{{ user_stats['total'] }}</td>
+      <td>{{ user_stats['machine'] }}</td>
+      <td>{{ user_stats['queued'] }}</td>
     </tr>
   </table>
 {% endblock %}
