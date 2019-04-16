@@ -168,6 +168,10 @@ def check_logged_in_user():
             session.clear()
             g.user = None
 
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('error.html'), 404
+
 if __name__ == '__main__':
     app.debug = True
     app.run()
