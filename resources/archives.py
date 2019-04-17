@@ -8,7 +8,7 @@ import pymongo # needed to display error message
 #       'user_id'           : ObjectId (String)
 #       'date'              : String
 #       'length'            : String
-#       'workout_id'        : ObjectId (String)
+#       'exercises'         : Array (String)
 
 class Archives(Resource):
     # set the collection to archives
@@ -19,7 +19,7 @@ class Archives(Resource):
         self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('date', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('length', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('workout_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('exercises', required=True, location="form")
 
     # general get request to get archive(s)
     def get(self, query_category, query_key):

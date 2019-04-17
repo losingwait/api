@@ -10,6 +10,8 @@ from resources.queue import remove_user
 #       'check_in_time'     : String
 #       'check_out_time'    : String
 #       'machine_id'        : ObjectId (String)
+#       'current_queue'     : String
+#       'exercises'         : Array (String)
 
 
 class GymUsers(Resource):
@@ -51,9 +53,9 @@ class GymUsers(Resource):
         return return_result
 
 def g_checkin(gym_users, user):
-    return gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now()})
+    return gym_users.insert_one({'user_id': str(user['_id']), 'name': user['name'], 'time': datetime.now(), 'exercises': []})
 
-def g_checkout(gym_users, machines, machine_groups, user_id, queueLocks):
+def g_checkout(gym_users, machines, machine_groups, user_id, queueLocks, archives):
     gym_user = gym_users.find_one({'user_id': str(user_id)})
     # Checkout of machine if user checked into machine
     if 'machine_id' in gym_user:
@@ -63,6 +65,11 @@ def g_checkout(gym_users, machines, machine_groups, user_id, queueLocks):
         queueLocks.lockQueue(gym_user['current_queue'])
         remove_user(machine_groups, gym_users, machines, gym_user['current_queue'], gym_user['user_id'], True)
         queueLocks.unlockQueue(gym_user['current_queue'])
+    # archives the users workout
+    totalSeconds = (datetime.now() - gym_user['time']).total_seconds()
+    date = str(gym_user['time'].date())
+    archive = {'user_id': user_id, 'date': date, 'length': totalSeconds, 'exercises': gym_user['exercises']}
+    archives.insert_one(archive)
     return gym_users.delete_one({'user_id': str(gym_user['user_id'])})
 
 def m_checkin(gym_users, machines, machine_groups, user_id, machine_id, queueLocks):
@@ -104,7 +111,8 @@ def m_checkout(gym_users, machines, machine_groups, user_id, machine_id, queueLo
             status = 'queued'
 
     userResult = gym_users.update_one({'user_id': str(user_id)},
-        {'$unset': {'machine_id': ""}},
+        {'$unset': {'machine_id': ""},
+        '$push': {'exercises': str(machine_id)}},
         upsert=False)
     machineResult = machines.update_one({'_id': ObjectId(machine_id)},
         {'$set': {'in_use': status},
@@ -121,6 +129,7 @@ class GymCheckin(Resource):
         self.users = self.db['users']
         self.machines = self.db['machines']
         self.machine_groups = self.db['machine_groups']
+        self.archives = self.db['archives']
         self.parser = reqparse.RequestParser(bundle_errors=True)
         self.parser.add_argument('rfid', required=True, location="form", case_sensitive=True, trim=True)
 
@@ -136,7 +145,7 @@ class GymCheckin(Resource):
                 return {'checkin': result.acknowledged, 'checkout': False}, 200
             else:
                 # check out of the gym
-                result = g_checkout(self.gym_users, self.machines, self.machine_groups, gym_user['user_id'], self.queueLocks)
+                result = g_checkout(self.gym_users, self.machines, self.machine_groups, gym_user['user_id'], self.queueLocks, self.archives)
                 return {'checkin': False, 'checkout': result.acknowledged}, 200
         else:
             return {'error': 'user not registered'}, 400
@@ -173,7 +182,6 @@ class MachineCheckin(Resource):
                     else:
                         return {'error': 'user not in queue'}, 403
                 else:
-                    # TODO: Add archives here
                     if gym_user['machine_id'] == str(machine['_id']):
                         # User check out of current machine
                         status = m_checkout(self.gym_users, self.machines, self.machine_groups, user['_id'], machine['_id'], self.queueLocks)
@@ -217,7 +225,6 @@ class FreeWeights(Resource):
         if machine:
             if args['available'].lower() in ['true']:
                 if machine['in_use'] != 'open':
-                    # TODO: Add archives here
                     self.machines.update_one({'_id': ObjectId(machine['_id'])},
                         {'$set': {'in_use': 'open'},
                         '$unset': {'signed_in_time': ''}},

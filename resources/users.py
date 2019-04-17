@@ -60,6 +60,7 @@ class UpdateUser(Resource):
         self.gym_users = self.db['gym_users']
         self.machines = self.db['machines']
         self.machine_groups = self.db['machine_groups']
+        self.archives = self.db['archives']
         self.parser = reqparse.RequestParser(bundle_errors=True)
         self.parser.add_argument('email', required=True, location="form", case_sensitive=False, trim=True)
         self.parser.add_argument('password', required=True, location="form", case_sensitive=False, trim=True)
@@ -73,7 +74,7 @@ class UpdateUser(Resource):
             gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
             # need to check a user out of the gym before updating
             if gym_user:
-                g_checkout(self.gym_users, self.machines, self.machine_groups, gym_user['user_id'], self.queueLocks)
+                g_checkout(self.gym_users, self.machines, self.machine_groups, gym_user['user_id'], self.queueLocks, self.archives)
             if check_password_hash(user['password'], args['password']):
                 try:
                     self.users.update_one({'email': args['email']},
