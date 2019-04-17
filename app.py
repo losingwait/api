@@ -5,6 +5,7 @@ import requests
 from werkzeug.security import check_password_hash
 from functools import wraps
 from bson.objectid import ObjectId
+import math
 
 from resources.users import SignUp, Login, UpdateUser
 from resources.exercises import Exercises
@@ -82,9 +83,11 @@ def home():
 @app.route('/gym/status')
 @login_required
 def gym_status():
+    archives = db['archives'].find({})
     gym_users = db['gym_users'].find({})
     machine_groups = db['machine_groups'].find({})
     machines = db['machines'].find({})
+    # get the machine stats
     machine_stats = {}
     for machine in machines:
         if machine['machine_group_id'] not in machine_stats:
@@ -97,6 +100,7 @@ def gym_status():
         else:
             machine_stats[machine['machine_group_id']][machine['in_use']] += 1
     
+    # get the user stats
     user_stats = {}
     user_stats['total'] = 0
     user_stats['machine'] = 0
@@ -108,7 +112,27 @@ def gym_status():
         if 'current_queue' in user:
             user_stats['queued'] +=1
 
-    return render_template('gym/status.html', machine_groups=machine_groups, machine_stats=machine_stats, user_stats=user_stats)
+    # get the time stats
+    time_stats = {}
+    for archive in archives:
+        print(archive)
+        dayOfWeek = archive['arrived'].weekday()
+        if dayOfWeek not in time_stats:
+            time_stats[dayOfWeek] = {}
+
+        timeDiff = archive['left'] - archive['arrived']
+        hoursAtGym = math.ceil(timeDiff.seconds / 60)
+        startingHour = archive['left'].hour
+        print(startingHour)
+        print(hoursAtGym)
+        for hour in range(startingHour, startingHour + hoursAtGym):
+            if hour not in time_stats[dayOfWeek]:
+                time_stats[dayOfWeek][hour] = 1
+            else:
+                time_stats[dayOfWeek][hour] += 1
+    print(time_stats)
+
+    return render_template('gym/status.html', machine_groups=machine_groups, machine_stats=machine_stats, user_stats=user_stats, time_stats=time_stats)
 
 @app.route('/register/machine', methods=('GET', 'POST'))
 @login_required
