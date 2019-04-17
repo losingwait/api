@@ -71,14 +71,12 @@ def m_checkin(gym_users, machines, machine_groups, user_id, machine_id, queueLoc
     groupQueue = machine_groups.find_one({'_id': ObjectId(machine['machine_group_id'])}, {'queue': 1, '_id': 0})
     validCheckin = True
     if groupQueue:
-        if machine['in_use'] == 'queued':
+        if machine['in_use'] == 'queued' or machine['in_use'] == 'occupied':
             in_queue, user_next_in_queue = remove_user(machine_groups, gym_users, machines, machine['machine_group_id'], user_id, False)
             if not in_queue or not user_next_in_queue:
                 validCheckin = False
         elif machine['in_use'] == 'open':
             remove_user(machine_groups, gym_users, machines, machine['machine_group_id'], user_id, True)
-        else:
-            validCheckin = False
 
     if validCheckin:
         userResult = gym_users.update_one({'user_id': str(user_id)},
@@ -154,13 +152,18 @@ class MachineCheckin(Resource):
     def post(self):
         args = self.parser.parse_args()
         user = self.users.find_one({'rfid': args['rfid']}, {'name': 1, '_id': 1})
-        machine = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1, 'machine_group_id': 1})
+        machine = self.machines.find_one({'station_id': args['station_id']}, {'_id': 1, 'machine_group_id': 1, 'user_id': 1})
         if user and machine:
             gym_user = self.gym_users.find_one({'user_id': str(user['_id'])})
             if gym_user:
                 if 'machine_id' not in gym_user:
                     # User in gym but not checked into machine
                     if m_checkin(self.gym_users, self.machines, self.machine_groups, user['_id'], machine['_id'], self.queueLocks):
+                        if 'user_id' in machine:
+                            # Need to check out old user if they were already on machine
+                            userResult = gym_users.update_one({'user_id': str(machine['user_id'])},
+                                {'$unset': {'machine_id': ""}},
+                                upsert=False)
                         return {'checkin': True, 'checkout': False, 'status': 'occupied'}, 200
                     else:
                         return {'error': 'user not in queue'}, 403
@@ -174,6 +177,10 @@ class MachineCheckin(Resource):
                         # User already checked into different machine without checkout
                         m_checkout(self.gym_users, self.machines, self.machine_groups, user['_id'], ObjectId(gym_user['machine_id']), self.queueLocks)
                         if m_checkin(self.gym_users, self.machines, self.machine_groups, user['_id'], machine['_id'], self.queueLocks):
+                            if 'user_id' in machine:
+                                userResult = gym_users.update_one({'user_id': str(machine['user_id'])},
+                                    {'$unset': {'machine_id': ""}},
+                                    upsert=False)
                             return {'checkin': True, 'checkout': False, 'status': 'occupied'}, 200
                         else:
                             return {'error': 'user not in queue'}, 403
@@ -181,6 +188,10 @@ class MachineCheckin(Resource):
                 # User wasn't checked into the gym
                 g_checkin(self.gym_users, user)
                 if m_checkin(self.gym_users, self.machines, self.machine_groups, user['_id'], machine['_id'], self.queueLocks):
+                    if 'user_id' in machine:
+                        userResult = gym_users.update_one({'user_id': str(machine['user_id'])},
+                            {'$unset': {'machine_id': ""}},
+                            upsert=False)
                     return {'checkin': True, 'checkout': False, 'status': 'occupied'}, 200
                 else:
                     return {'error': 'user not in queue'}, 403
