@@ -16,22 +16,24 @@
     <label for='muscle'>Muscle</label>
     <select name='muscle' required>
       {% for muscle in muscles %}
-        <option value="{{ muscle['name'] }}">{{ muscle['name'] }}</option>
+        <option value="{{ muscle['_id'] }}">{{ muscle['name'] }}</option>
       {% endfor %}
     </select>
     <br/>
-    <label for='location'>Location</label>
-    <select name='location' required>
-      <option value='none'>None</option>
+    <label for='group'>Machine Group</label>
+    <select name='group' required>
+      {% for group in machine_groups %}
+        <option value="{{ group['_id'] }}">{{ group['name'] }}</option>
+      {% endfor %}
     </select>
     <br/>
-    <label for='sensor'>Sensor ID</label>
-    <input name='sensor' id='sensor' type='text' required>
+    <label for='station'>Mac Address</label>
+    <input name='station' id='station' type='text' required>
     <br/>
     <input type='submit' value='Register'>
   </form>
 
-  <h2>Current Machines</h2>
+  <h1>Current Machines</h1>
   <table>
     <tr>
       <th>Name</th>

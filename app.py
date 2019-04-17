@@ -82,36 +82,56 @@ def home():
 @app.route('/gym/status')
 @login_required
 def gym_status():
-    return render_template('gym/status.html')
-
-@app.route('/register/user', methods=('GET', 'POST'))
-@login_required
-def register_user():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
-        rfid = request.form['rfid']
-        payload = {'name': name, 'email': email, 'password': password, 'rfid': rfid}
-        r = requests.post(request.url_root + 'users/signup', data=payload)
-        if r.status_code == requests.codes.ok:
-            flash("You've created new a user!", "success")
+    gym_users = db['gym_users'].find({})
+    machine_groups = db['machine_groups'].find({})
+    machines = db['machines'].find({})
+    machine_stats = {}
+    for machine in machines:
+        if machine['machine_group_id'] not in machine_stats:
+            machine_stats[machine['machine_group_id']] = {}
+            machine_stats[machine['machine_group_id']]['total'] = 1
         else:
-            flash("You've failed to create a new user!", "error")
-        return redirect(url_for('register_user'))
-    else:
-        users = db['users'].find({})
-        return render_template('register/user.html', users=users)
+            machine_stats[machine['machine_group_id']]['total'] += 1
+        if machine['in_use'] not in machine_stats[machine['machine_group_id']]:
+            machine_stats[machine['machine_group_id']][machine['in_use']] = 1
+        else:
+            machine_stats[machine['machine_group_id']][machine['in_use']] += 1
+    
+    user_stats = {}
+    user_stats['total'] = 0
+    user_stats['machine'] = 0
+    user_stats['queued'] = 0
+    for user in gym_users:
+        user_stats['total'] += 1
+        if 'machine_id' in user:
+            user_stats['machine'] += 1
+        if 'current_queue' in user:
+            user_stats['queued'] +=1
+
+    return render_template('gym/status.html', machine_groups=machine_groups, machine_stats=machine_stats, user_stats=user_stats)
 
 @app.route('/register/machine', methods=('GET', 'POST'))
 @login_required
 def register_machine():
     if request.method == 'POST':
-        # TODO: Add Registering Machines
-        pass
-    machines = db['machines'].find({})
-    muscles = db['muscles'].find({})
-    return render_template('register/machine.html', machines=machines, muscles=muscles)
+        name = request.form['name']
+        muscle_id = request.form['muscle']
+        machine_group_id = request.form['group']
+        station_id = request.form['station']
+        in_use = 'open'
+        payload = {'name': name, 'muscle_id': muscle_id, 'machine_group_id': machine_group_id, 'station_id': station_id, 'in_use': in_use}
+        r = requests.post(request.url_root + 'machines', data=payload)
+        if r.status_code == requests.codes.ok:
+            flash("You've created new a machine!", "success")
+        else:
+            flash("You've failed to create a new machine! Check the Mac Address!", "error")
+        return redirect(url_for('register_machine'))
+    else:
+        # GET Request
+        machines = db['machines'].find({})
+        muscles = db['muscles'].find({}, {'name': 1, '_id': 1})
+        machine_groups = db['machine_groups'].find({}, {'name': 1, '_id': 1})
+        return render_template('register/machine.html', machines=machines, muscles=muscles, machine_groups=machine_groups)
 
 @app.route('/admin/login', methods=('GET', 'POST'))
 def admin_login():
@@ -148,6 +168,10 @@ def check_logged_in_user():
             session.clear()
             g.user = None
 
+@app.errorhandler(404)
+def not_found(e):
+    return render_template('error.html'), 404
+
 if __name__ == '__main__':
-    #app.debug = True
+    app.debug = True
     app.run()

@@ -1,0 +1,31 @@
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+}
+
+th {
+  background-color: #a2c6ff;
+  text-align: left;
+  font-size: 20px
+}
+
+table {
+  width: 100%;
+}
+
+tr:nth-child(even) {
+  background-color: #e3f8ff;
+}
+
+tr:nth-child(odd) {
+  background-color: #eeeeee;
+}
+
+.title {
+  font-size: 30px;
+  text-align: center;
+}

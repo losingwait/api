@@ -1,7 +1,75 @@
 {% extends 'base.html' %}
 
+{% block head %}
+  {{ super() }}
+  <meta http-equiv="refresh" content="20">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/status.css') }}">
+{% endblock %}
+
 {% block title %}Gym Status{% endblock %}
 
 {% block content %}
-  <h1>Gym Status</h1>
+  <h1 class='title'>Gym Status</h1>
+
+  <h2>Machines Status</h2>
+  <table>
+    <tr>
+      <th>Name</th>
+      <th>Queue Size</th>
+      <th>Open</th>
+      <th>Occupied</th>
+      <th>Queued</th>
+      <th>Total Machines</th>
+    </tr>
+
+    {% for group in machine_groups %}
+      <tr>
+        <td>{{ group['name'] }}</td>
+
+        {% if 'queue' in group %}
+          <td>{{ group['queue']|list|length }}</td>
+        {% else %}
+          <td>Empty</td>
+        {% endif %}
+
+        {% if machine_stats[ group['_id']|string ]['open'] %}
+          <td>{{ machine_stats[ group['_id']|string ]['open']}}</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+
+        {% if machine_stats[ group['_id']|string ]['occupied'] %}
+          <td>{{ machine_stats[ group['_id']|string ]['occupied']}}</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+
+        {% if machine_stats[ group['_id']|string ]['queued'] %}
+          <td>{{ machine_stats[ group['_id']|string ]['queued']}}</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+
+        {% if machine_stats[ group['_id']|string ]['total'] %}
+          <td>{{ machine_stats[ group['_id']|string ]['total']}}</td>
+        {% else %}
+          <td>0</td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+
+  <h2>Users Status</h2>
+  <table>
+    <tr>
+      <th>Total In Gym</th>
+      <th>Total On Machines</th>
+      <th>Total In Queue</th>
+    </tr>
+    <tr>
+      <td>{{ user_stats['total'] }}</td>
+      <td>{{ user_stats['machine'] }}</td>
+      <td>{{ user_stats['queued'] }}</td>
+    </tr>
+  </table>
 {% endblock %}

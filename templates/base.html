@@ -13,7 +13,6 @@
       <li><a href="{{ url_for('home') }}"><strong>Losing Wait</strong></a></li>
       {% if g.user %}
         <li><a href="{{ url_for('gym_status') }}">Gym</a></li>
-        <li><a href="{{ url_for('register_user') }}">Users</a></li>
         <li><a href="{{ url_for('register_machine') }}">Machines</a></li>
       {% endif %}
       {% if g.user %}
