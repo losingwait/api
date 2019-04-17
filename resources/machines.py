@@ -34,7 +34,7 @@ class Machines(Resource):
         if '_id' == query_category.lower():
             query_key = ObjectId(query_key)
         if query_category == 'station_id':
-            query_key = int(query_key)
+            query_key = str(query_key)
         
         # send proper query / if they want all
         if query_category and query_key == 'all':
@@ -52,7 +52,7 @@ class Machines(Resource):
                 if 'signed_in_time' == key.lower():
                     document[key] = str(value)
                 if key == 'station_id':
-                    document[key] = int(value)
+                    document[key] = str(value)
             
             # place the document in the result with the '_id' as the name
             return_result[document['_id']] = document
