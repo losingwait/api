@@ -20,6 +20,7 @@ class Workouts(Resource):
         self.workouts = self.db['workouts']
         self.parser = reqparse.RequestParser(bundle_errors=True)
         self.parser.add_argument('name', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('description', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('array_exercises_dictionary', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('difficulty', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('workout_image', required=False, location="form", case_sensitive=True, trim=True)
