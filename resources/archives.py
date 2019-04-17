@@ -17,9 +17,9 @@ class Archives(Resource):
         self.archives = self.db['archives']
         self.parser = reqparse.RequestParser(bundle_errors=True)
         self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('date', required=False, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('length', required=False, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('exercises', required=False, location="form")
+        self.parser.add_argument('date', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('length', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('exercises', required=True, location="form")
 
     # general get request to get archive(s)
     def get(self, query_category, query_key):
