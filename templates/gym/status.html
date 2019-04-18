@@ -87,7 +87,7 @@
       <th>Sunday</th>
     </tr>
     {% for time in range(8, 8 + 15) %}
-      {% set strTime = (((time - 1) % 12) + 1) |string + ":00" %}
+      {% set strTime = (((time - 1) % 12) + 1)|string + ":00" %}
       <tr>
         <td>{{ strTime }}</td>
 
