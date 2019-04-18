@@ -33,6 +33,7 @@ def getUserStats(gym_users):
 def getTimeStats(archives):
     # get the time stats
     time_stats = {}
+    maxCount = 0
     for archive in archives:
         time = archive['arrived']
         left = archive['left']
@@ -44,6 +45,8 @@ def getTimeStats(archives):
                 time_stats[time.weekday()][time.hour] = 1
             else:
                 time_stats[time.weekday()][time.hour] += 1
+            if time_stats[time.weekday()][time.hour] > maxCount:
+                maxCount = time_stats[time.weekday()][time.hour]
             prevHour = time.hour
             time += timedelta(hours=1)
         # checks if the left times hour was left out
@@ -52,4 +55,21 @@ def getTimeStats(archives):
                 time_stats[left.weekday()][left.hour] = 1
             else:
                 time_stats[left.weekday()][left.hour] += 1
+            if time_stats[left.weekday()][left.hour] > maxCount:
+                maxCount = time_stats[left.weekday()][left.hour]
+        
+    # assigns the time slots to the correct business buckets, effectively normalization
+    for day, hours in time_stats.items():
+        for hour, count in hours.items():
+            ratio = count / maxCount
+            # 4 different busy buckets
+            if ratio >= 0.75:
+                time_stats[day][hour] = 3
+            elif ratio >= 0.50:
+                time_stats[day][hour] = 2
+            elif ratio >= 0.25:
+                time_stats[day][hour] = 1
+            else:
+                time_stats[day][hour] = 0
+            
     return time_stats
