@@ -59,10 +59,13 @@ class Workouts(Resource):
     # manage post requests to the workouts collection
     # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
     def post(self):
-        json_data = self.parser.parse_args()
+        json_data = request.get_json(force = True)
+    
 
         try:
             result = self.workouts.insert_one(json_data)
             return {'inserted': result.acknowledged}
         except pymongo.errors.DuplicateKeyError as e:
             return {'inserted': False, 'error': e.details}
+
+#curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Karsen","array_exercises_dictionary":[{"_id":"5c9902a09aa5f3000a297201","name":"Cat Cow","reps":"10","sets":"1"},{"_id":"5c9902a09aa5f3000b0e0536","name":"Scapular Push-Up","reps":"10","sets":"1"},{"_id":"5c9902a19aa5f3000b0e0537","name":"Side-Lying Thoracic Rotation","reps":"5","sets":"1"},{"_id":"5c9902a19aa5f3000b0e0538","name":"Spider Crawl","reps":"50ft","sets":"3"},{"_id":"5c9902a19aa5f3000b0e0539","name":"Skip","reps":"50ft","sets":"3"},{"_id":"5c9902a19aa5f3000b0e053a","name":"Lateral Shuffle","reps":"50ft","sets":"3"},{"_id":"5c9902a29aa5f3000b0e053b","name":"Push-Ups","reps":"8","sets":"4"},{"_id":"5c9902a29aa5f3000b0e053c","name":"Floor Angel","reps":"10","sets":"4"},{"_id":"5c9902a29aa5f3000b0e053d","name":"Inverted Row","reps":"8","sets":"4"},{"_id":"5c9902a29aa5f3000b0e053e","name":"Childs Pose","reps":"1","sets":"4"},{"_id":"5c9902a29aa5f3000b0e053f","name":"Single-Leg Squat To Box","reps":"6","sets":"4"},{"_id":"5c9902a39aa5f3000a297202","name":"Hollow Hold","reps":"20 seconds","sets":"4"}],"difficulty":"Beginner","workout_image":"https://www.bodybuilding.com/images/2018/january/total-body-strong-sales-page-header-1920x1080-700xh.jpg"}' http://127.0.0.1:5000/workouts

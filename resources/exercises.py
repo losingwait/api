@@ -23,7 +23,7 @@ class Exercises(Resource):
         self.parser.add_argument('name', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('muscle_id', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('machine_group_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('exercise_media', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('exercise_media', required=False, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('user_id', required=False, location="form", case_sensitive=True, trim=True)
 
     # general get request to get exercise(s)
