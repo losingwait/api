@@ -1,3 +1,4 @@
+from datetime import timedelta
 import math
 
 def getMachineStats(machines):
@@ -33,26 +34,22 @@ def getTimeStats(archives):
     # get the time stats
     time_stats = {}
     for archive in archives:
-        print(archive)
-        dayOfWeek = archive['arrived'].weekday()
-        if dayOfWeek not in time_stats:
-            time_stats[dayOfWeek] = {}
-
-        timeDiff = archive['left'] - archive['arrived']
-        hoursAtGym = math.ceil(timeDiff.total_seconds() / 3600)
-        startingHour = archive['arrived'].hour
-        print(startingHour)
-        print(hoursAtGym)
-        for hour in range(startingHour, startingHour + hoursAtGym):
-            adjustedHour = ((hour - 1) % 24) + 1
-            if adjustedHour not in time_stats[dayOfWeek]:
-                time_stats[dayOfWeek][adjustedHour] = 1
+        time = archive['arrived']
+        left = archive['left']
+        prevHour = time.hour
+        while time < left:
+            if time.weekday() not in time_stats:
+                time_stats[time.weekday()] = {}
+            if time.hour not in time_stats[time.weekday()]:
+                time_stats[time.weekday()][time.hour] = 1
             else:
-                time_stats[dayOfWeek][adjustedHour] += 1
-            # if its about to become the next day
-            if adjustedHour is 24:
-                dayOfWeek += 1
-                if dayOfWeek not in time_stats:
-                    time_stats[dayOfWeek] = {}
-    print(time_stats)
+                time_stats[time.weekday()][time.hour] += 1
+            prevHour = time.hour
+            time += timedelta(hours=1)
+        # checks if the left times hour was left out
+        if prevHour is not left.hour:
+            if left.hour not in time_stats[left.weekday()]:
+                time_stats[left.weekday()][left.hour] = 1
+            else:
+                time_stats[left.weekday()][left.hour] += 1
     return time_stats
