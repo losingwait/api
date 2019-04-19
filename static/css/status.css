@@ -29,3 +29,23 @@ tr:nth-child(odd) {
   font-size: 30px;
   text-align: center;
 }
+
+.red {
+  color: #b83030;
+}
+
+.orange {
+  color: #f59506;
+}
+
+.yellow {
+  color: #b9c427;
+}
+
+.green {
+  color: #4cb12d;
+}
+
+.blue {
+  color: #195097;
+}

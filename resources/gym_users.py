@@ -66,9 +66,7 @@ def g_checkout(gym_users, machines, machine_groups, user_id, queueLocks, archive
         remove_user(machine_groups, gym_users, machines, gym_user['current_queue'], gym_user['user_id'], True)
         queueLocks.unlockQueue(gym_user['current_queue'])
     # archives the users workout
-    totalSeconds = (datetime.now() - gym_user['time']).total_seconds()
-    date = str(gym_user['time'].date())
-    archive = {'user_id': user_id, 'date': date, 'length': totalSeconds, 'exercises': gym_user['exercises']}
+    archive = {'user_id': user_id, 'arrived': gym_user['time'], 'left': datetime.now(), 'exercises': gym_user['exercises']}
     archives.insert_one(archive)
     return gym_users.delete_one({'user_id': str(gym_user['user_id'])})
 
