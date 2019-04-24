@@ -19,12 +19,14 @@ class Workouts(Resource):
         self.db = kwargs['db']
         self.workouts = self.db['workouts']
         self.parser = reqparse.RequestParser(bundle_errors=True)
-        self.parser.add_argument('name', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('description', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('array_exercises_dictionary', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('difficulty', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('name', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('description', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('array_exercises_dictionary', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('difficulty', required=False, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('workout_image', required=False, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('user_id', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('action', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('del_id', required=False, location="form", case_sensitive=True, trim=True)
 
     # general get request to get workout(s)
     def get(self, query_category, query_key):
@@ -57,14 +59,17 @@ class Workouts(Resource):
         return return_result
 
     # manage post requests to the workouts collection
-    # example: curl -i -H "Content-Type: application/json" -X POST -d '{"name":"Squat","category":"Legs","machine_type_id":2,"reps":"12-15 reps","duration":"3 sets"}' http://localhost:5000/exercises
+    # example: curl -i -H "Content-Type: application/json" -X POST -d '{"del_id":"5cb8aa20bf09a3000a2136d1","action":"remove"}' http://localhost:5000/workouts
     def post(self):
         json_data = request.get_json(force = True)
     
-
         try:
-            result = self.workouts.insert_one(json_data)
-            return {'inserted': result.acknowledged}
+            if json_data['action'] == 'remove':
+                result = self.workouts.delete_one({'_id' : ObjectId(json_data['del_id'])})
+                return {'deleted': result.acknowledged}
+            else:
+                result = self.workouts.insert_one(json_data)
+                return {'inserted': result.acknowledged}
         except pymongo.errors.DuplicateKeyError as e:
             return {'inserted': False, 'error': e.details}
 

@@ -12,7 +12,6 @@ import pymongo # needed to display error message
 #       'exercise_media'    : String
 #       'user_id'           : ObjectId (optional for "Featured") *** check exists (String)
 
-
 class Exercises(Resource):
     # set the collection to exercises
     def __init__(self, **kwargs):
@@ -20,11 +19,13 @@ class Exercises(Resource):
         self.db = kwargs['db']
         self.exercises = self.db['exercises']
         self.parser = reqparse.RequestParser(bundle_errors=True)
-        self.parser.add_argument('name', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('muscle_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('machine_group_id', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('name', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('muscle_id', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('machine_group_id', required=False, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('exercise_media', required=False, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('user_id', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('action', required=False, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('del_id', required=False, location="form", case_sensitive=True, trim=True)
 
     # general get request to get exercise(s)
     def get(self, query_category, query_key):
@@ -62,7 +63,11 @@ class Exercises(Resource):
         json_data = self.parser.parse_args()
 
         try:
-            result = self.exercises.insert_one(json_data)
-            return {'inserted': result.acknowledged}
+            if json_data['action'] == 'remove':
+                result = self.exercises.delete_one({'_id' : ObjectId(json_data['del_id'])})
+                return {'deleted': result.acknowledged}
+            else:
+                result = self.exercises.insert_one(json_data)
+                return {'inserted': result.acknowledged}
         except pymongo.errors.DuplicateKeyError as e:
             return {'inserted': False, 'error': e.details}
