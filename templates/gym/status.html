@@ -64,12 +64,77 @@
     <tr>
       <th>Total In Gym</th>
       <th>Total On Machines</th>
-      <th>Total In Queue</th>
+      <th>Total Queued Up</th>
     </tr>
     <tr>
       <td>{{ user_stats['total'] }}</td>
       <td>{{ user_stats['machine'] }}</td>
       <td>{{ user_stats['queued'] }}</td>
     </tr>
+  </table>
+
+  <h2>Popular Times</h2>
+  <table>
+    {% set time = 8 %}
+    <tr>
+      <th>Time</th>
+      <th>Monday</th>
+      <th>Tuesday</th>
+      <th>Wednesday</th>
+      <th>Thursday</th>
+      <th>Friday</th>
+      <th>Saturday</th>
+      <th>Sunday</th>
+    </tr>
+    {% set colors = {3: 'red', 2: 'orange', 1: 'yellow', 0: 'green'} %}
+    {% set traffic = {3: 'Very Busy', 2: 'Busy', 1: 'Kinda Busy', 0: 'Not Busy'} %}
+    {% for time in range(8, 8 + 15) %}
+      {% set strTime = (((time - 1) % 12) + 1)|string + ":00" %}
+      <tr>
+        <td>{{ strTime }}</td>
+
+        {% if 0 in time_stats and time in time_stats[0] %}
+          <td class="{{ colors[time_stats[0][time]] }}">{{ traffic[time_stats[0][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+
+        {% if 1 in time_stats and time in time_stats[1] %}
+          <td class="{{ colors[time_stats[1][time]] }}">{{ traffic[time_stats[1][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+
+        {% if 2 in time_stats and time in time_stats[2] %}
+          <td class="{{ colors[time_stats[2][time]] }}">{{ traffic[time_stats[2][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+
+        {% if 3 in time_stats and time in time_stats[3] %}
+          <td class="{{ colors[time_stats[3][time]] }}">{{ traffic[time_stats[3][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+
+        {% if 4 in time_stats and time in time_stats[4] %}
+          <td class="{{ colors[time_stats[4][time]] }}">{{ traffic[time_stats[4][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+
+        {% if 5 in time_stats and time in time_stats[5] %}
+          <td class="{{ colors[time_stats[5][time]] }}">{{ traffic[time_stats[5][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+
+        {% if 6 in time_stats and time in time_stats[6] %}
+          <td class="{{ colors[time_stats[6][time]] }}">{{ traffic[time_stats[6][time]] }}</td>
+        {% else %}
+          <td class="blue">Empty</td>
+        {% endif %}
+      </tr>
+    {% endfor %}
   </table>
 {% endblock %}

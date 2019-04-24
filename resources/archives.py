@@ -6,8 +6,8 @@ import pymongo # needed to display error message
 # format of archives document:
 #       '_id'               : ObjectId
 #       'user_id'           : ObjectId (String)
-#       'date'              : String
-#       'length'            : String
+#       'arrived'           : Datetime
+#       'left'              : Datetime
 #       'exercises'         : Array (String)
 
 class Archives(Resource):
@@ -17,8 +17,8 @@ class Archives(Resource):
         self.archives = self.db['archives']
         self.parser = reqparse.RequestParser(bundle_errors=True)
         self.parser.add_argument('user_id', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('date', required=True, location="form", case_sensitive=True, trim=True)
-        self.parser.add_argument('length', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('arrived', required=True, location="form", case_sensitive=True, trim=True)
+        self.parser.add_argument('left', required=True, location="form", case_sensitive=True, trim=True)
         self.parser.add_argument('exercises', required=True, location="form")
 
     # general get request to get archive(s)
